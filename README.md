@@ -17,6 +17,14 @@ Several technologies that I am learning as part of this project:
 7. Docker - https://www.docker.com/
 8. Git - https://git-scm.com/ | https://github.com/
 
+## Useful Resources
+1. https://wiki.libsdl.org/Installation
+2. https://lazyfoo.net/tutorials/SDL/index.php
+3. https://glusoft.com/tutorials/
+4. https://blog.j2i.net/2020/12/20/introduction-to-web-assembly-with-c-c-part-1/
+5. https://www.jamesfmackenzie.com/2019/12/01/webassembly-graphics-with-sdl/
+6. https://learnopengl.com/
+
 ## Ideas
 ### Game
 1. Starting small is the first goal for this game. Something to learn about creating a simple state-machine (think tic-tac-toe).
