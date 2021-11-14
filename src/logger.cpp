@@ -199,6 +199,8 @@ void Logger::write_message_buffer(const std::string _message, const std::string 
     ss << "[" << Timer::current_time() << "] " << _flag << ": " << _message;
     std::cout << ss.str() << std::endl;
 
+// Do not write to file if we build as web app
+#if !(defined(__EMSCRIPTEN_major__) || defined(__EMSCRIPTEN_minor__) || defined(__EMSCRIPTEN_tiny__))
     std::ofstream stream;
     stream.open(this->get_filename_rotated(), std::ios::out | std::ios::app);
     stream << ss.str() << std::endl;
@@ -217,4 +219,5 @@ void Logger::write_message_buffer(const std::string _message, const std::string 
         stream.flush();
         stream.close();
     }
+#endif
 }
