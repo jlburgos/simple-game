@@ -22,11 +22,6 @@
 
 class Logger
 {
-private:
-    std::string filename;
-    unsigned int rotation;
-    static Logger *logger;
-
 public:
     static Logger *get_logger();
     void info(const std::string);
@@ -34,6 +29,10 @@ public:
     void error(const std::string);
     
 private:
+    std::string filename;
+    unsigned int rotation;
+    static Logger *logger;
+
     const std::string INFO = "INFO";
     const std::string WARN = "WARN";
     const std::string ERROR = "ERROR";
