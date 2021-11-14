@@ -45,9 +45,8 @@ OPTIMIZATION=-O2
 ## Notes: https://stackoverflow.com/questions/5088460/flags-to-enable-thorough-and-verbose-g-warnings
 CXX_COMPILER_FLAGS=\
 	-Wall \
-	-Weffc++ \
 	-pedantic \
-	-pedantic-errors -Wextra -Waggregate-return -Wcast-align \
+	-pedantic-errors -Wextra -Wcast-align \
 	-Wcast-qual -Wconversion \
 	-Wdisabled-optimization \
 	-Werror -Wfloat-equal -Wformat=2 \
