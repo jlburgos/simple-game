@@ -95,7 +95,7 @@ void WindowManager::start()
     SDL_UpdateWindowSurface(this->window);
 
     // Wait for a bit
-    SDL_Delay(3*1E3);
+    SDL_Delay(3E3);
 }
 
 /**
