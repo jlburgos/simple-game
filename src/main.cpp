@@ -20,16 +20,20 @@
  */
 int main(void)
 {
+  LOG.info("Starting program...");
   SDL_SetMainReady();
   WindowManager mgr;
 
+  LOG.info("Initializing window manager...");
   int rc = mgr.init();
   if (rc != 0)
   {
-    fprintf(stderr, "Failed to initialize program!\n");
+    LOG.error("Failed to initialize program!\n");
     return rc;
   }
+  LOG.info("Initialization completed! Bringing up window now...");
   mgr.start();
 
+  LOG.info("Program completed");
   return 0;
 }
