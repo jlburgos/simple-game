@@ -105,7 +105,7 @@ std::string Logger::get_filename_rotated() const
  */
 void Logger::rotate_log()
 {
-    // TODO
+    this->set_rotation(this->rotation + 1);
 }
 
 /**
