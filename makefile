@@ -113,7 +113,7 @@ wasm:
 			--closure 1 \
 			--minify 0 \
 			--bind \
-			src/main.cpp src/window_manager.cpp -o bin/game.html
+			src/main.cpp src/logger.cpp src/timer.cpp src/window_manager.cpp -o bin/game.html
 
 oldDefault: clean
 	mkdir -p $(BIN_DIR)
