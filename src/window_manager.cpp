@@ -94,9 +94,8 @@ void WindowManager::start()
     // Update the surface
     SDL_UpdateWindowSurface(this->window);
 
-    // Wait two seconds
-    SDL_Delay(2000);
-    SDL_DestroyWindow(this->window);
+    // Wait for a bit
+    SDL_Delay(3*1E3);
 }
 
 /**
@@ -106,5 +105,6 @@ void WindowManager::start()
 void WindowManager::close()
 {
     // Quit SDL subsystems
+    SDL_DestroyWindow(this->window);
     SDL_Quit();
 }
