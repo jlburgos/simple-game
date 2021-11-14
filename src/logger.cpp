@@ -13,10 +13,6 @@
 #include "timer.hpp"
 
 // Initialize static fields
-const std::string Logger::INFO = "INFO";
-const std::string Logger::WARN = "WARN";
-const std::string Logger::ERROR = "ERROR";
-const unsigned int Logger::FILE_SIZE_LIMIT = 1E4; // 10,000 bytes
 Logger *Logger::logger = nullptr;                 // Initialize singleton pointer
 
 /**

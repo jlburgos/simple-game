@@ -23,16 +23,15 @@
 class Logger
 {
 public:
-    static const std::string INFO;
-    static const std::string WARN;
-    static const std::string ERROR;
-    static const unsigned int FILE_SIZE_LIMIT;
+    const std::string INFO = "INFO";
+    const std::string WARN = "WARN";
+    const std::string ERROR = "ERROR";
+    const unsigned int FILE_SIZE_LIMIT = 1E4; // 10,000 bytes
 
 private:
     std::string filename;
     unsigned int rotation;
 
-private:
     // Constructors and assignment operator are private for a reason
     Logger();
     Logger(const std::string &_filename);
