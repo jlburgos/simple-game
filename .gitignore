@@ -1,0 +1,3 @@
+.vscode
+bin/game.*
+node_modules
