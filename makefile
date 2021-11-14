@@ -89,7 +89,7 @@ endif
 ######################################################################################################
 
 default:
-	$(CXX) src/main.cpp src/window_manager.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
+	$(CXX) src/main.cpp src/logger.cpp src/timer.cpp src/window_manager.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
 
 assets:
 	## TODO: Write loop that handles xxd.exe
