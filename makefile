@@ -107,6 +107,7 @@ wasm:
 			-L /src/external-dep/SDL2/lib \
 			-v \
 			-s LLD_REPORT_UNDEFINED \
+			-s WASM=1 \
 			-s USE_SDL=2 \
 			-s USE_SDL_IMAGE=2 \
 			-s USE_SDL_TTF=2 \
