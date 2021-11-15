@@ -36,7 +36,9 @@ private:
     const std::string INFO = "INFO";
     const std::string WARN = "WARN";
     const std::string ERROR = "ERROR";
+#if !defined(__EMSCRIPTEN_major__)
     const unsigned int FILE_SIZE_LIMIT = 1E4; // 10,000 bytes
+#endif
 
     // Constructors and assignment operator are private because this is to be a singleton obj
     Logger();

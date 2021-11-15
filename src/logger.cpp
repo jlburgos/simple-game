@@ -23,6 +23,7 @@ Logger::Logger()
 {
     filename = "game";
     rotation = 0;
+#if !defined(__EMSCRIPTEN_major__)
 }
 
 /**
@@ -196,7 +197,7 @@ void Logger::write_message_buffer(const std::string _message, const std::string 
     std::cout << ss.str() << std::endl;
 
 // Do not write to file if we build as web app
-#if !(defined(__EMSCRIPTEN_major__) && defined(__EMSCRIPTEN_minor__) && defined(__EMSCRIPTEN_tiny__))
+#if !defined(__EMSCRIPTEN_major__)
     std::ofstream stream;
     stream.open(this->get_filename_rotated(), std::ios::out | std::ios::app);
     stream << ss.str() << std::endl;
