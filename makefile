@@ -24,12 +24,26 @@ PRE_COMP_ASSETS=src/pre-compiled-assets
 
 ## SDL Flags
 SDL_FLAGS=\
-    -Isrc/external-dep/SDL2/inc \
-	-Lsrc/external-dep/SDL2/lib \
-	-lSDL2main \
-	-lSDL2 \
-	-lSDL2_image \
-	-lSDL2_ttf
+	-I src/external-dep/SDL2/inc \
+	-L src/external-dep/SDL2/lib \
+	-l SDL2main \
+	-l SDL2 \
+	-l SDL2_image \
+	-l SDL2_ttf
+
+WASM_SDL_FLAGS=\
+	-s USE_SDL=2 \
+	-s USE_SDL_IMAGE=2 \
+	-s USE_SDL_TTF=2 \
+	-s SDL2_IMAGE_FORMATS="[png,bmp,jpg]" \
+	-s LLD_REPORT_UNDEFINED \
+	-s WASM=1 \
+	-flto \
+	-v \
+	--closure 1 \
+	--minify 0 \
+	--bind
+
 
 ## Note: Add the '-mwindows' option to remove the terminal pop-up when double-clicking the game.exe file
 ##       https://gcc.gnu.org/onlinedocs/gcc/x86-Windows-Options.html
@@ -75,6 +89,12 @@ OPTS=\
 	$(SDL_FLAGS) \
 	$(CXX_COMPILER_FLAGS)
 
+WASM_OPTS=\
+	$(OPTIMIZATION) \
+	$(CXX_STD) \
+	$(WASM_SDL_FLAGS) \
+	$(CXX_COMPILER_FLAGS)
+
 ######################################################################################################
 ######################################################################################################
 
@@ -97,30 +117,10 @@ assets:
 wasm:
 	docker run \
 		--rm \
-		--name simplegame-wasm-build \
-		--volume $(CWD):/src \
-		emscripten/emsdk em++ \
-			$(OPTIMIZATION) \
-			$(CXX_STD) \
-			$(CXX_COMPILER_FLAGS) \
-			-I /src/external-dep/SDL2/inc \
-			-L /src/external-dep/SDL2/lib \
-			-v \
-			-s LLD_REPORT_UNDEFINED \
-			-s WASM=1 \
-			-s USE_SDL=2 \
-			-s USE_SDL_IMAGE=2 \
-			-s USE_SDL_TTF=2 \
-			-s SDL2_IMAGE_FORMATS="[png,bmp,jpg]" \
-			--closure 1 \
-			--minify 0 \
-			--bind \
-			-flto \
-			src/*.cpp -o bin/game.html
-
-oldDefault: clean
-	mkdir -p $(BIN_DIR)
-	$(CXX) src/main.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
+		--name simple-game-wasm-build \
+		--volume $(CWD):/simple-game \
+		emscripten/emsdk /bin/bash -c \
+			'pip install requests && em++ $(WASM_OPTS) /simple-game/src/*.cpp -o /simple-game/bin/game.html'
 
 clean:
 	$(RM) $(BIN_DIR)
