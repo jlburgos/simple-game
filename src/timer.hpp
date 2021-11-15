@@ -18,8 +18,17 @@
 #include <string>
 #include <sstream>
 
+/**
+ * @brief 
+ * 
+ */
 namespace Timer
 {
+    /**
+     * @brief 
+     * 
+     * @return std::string 
+     */
     std::string current_time();
 }
 
