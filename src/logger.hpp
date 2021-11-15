@@ -54,6 +54,7 @@ private:
     unsigned int get_rotation() const;
     void set_rotation(unsigned int);
     void write_message_buffer(const std::string, const std::string flag);
+    std::string message_prefix(const std::string _flag);
 }; 
 
 // Define global logger
