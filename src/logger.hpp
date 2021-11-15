@@ -56,6 +56,7 @@ private:
     void write_message_buffer(const std::string, const std::string flag);
 }; 
 
+// Define global logger
 #define LOG (*Logger::get_logger())
 
 #endif /* _LOGGER_HPP */
