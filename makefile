@@ -25,7 +25,6 @@ PRE_COMP_ASSETS=src/pre-compiled-assets
 ## SDL Flags
 SDL_FLAGS=\
 	-I src/external-dep/SDL2/inc \
-	-L src/external-dep/SDL2/lib \
 	-l SDL2main \
 	-l SDL2 \
 	-l SDL2_image \
