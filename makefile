@@ -89,7 +89,7 @@ endif
 ######################################################################################################
 
 default:
-	$(CXX) src/main.cpp src/logger.cpp src/timer.cpp src/window_manager.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
+	$(CXX) src/*.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
 
 assets:
 	## TODO: Write loop that handles xxd.exe
@@ -116,7 +116,7 @@ wasm:
 			--minify 0 \
 			--bind \
 			-flto \
-			src/main.cpp src/logger.cpp src/timer.cpp src/window_manager.cpp -o bin/game.html
+			src/*.cpp -o bin/game.html
 
 oldDefault: clean
 	mkdir -p $(BIN_DIR)
