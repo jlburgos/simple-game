@@ -192,29 +192,32 @@ void Logger::error(const std::string _message)
  */
 void Logger::write_message_buffer(const std::string _message, const std::string _flag)
 {
-    std::stringstream ss;
-    ss << "[" << Timer::current_time() << "] " << _flag << ": " << _message;
-    std::cout << ss.str() << std::endl;
-
+    std::cout << this->message_prefix(_flag) << _message << std::endl;
 // Do not write to file if we build as web app
 #if !defined(__EMSCRIPTEN_major__)
+    std::cout << this->message_prefix(_flag) << "Writing logs to file..." << std::endl;
     std::ofstream stream;
     stream.open(this->get_filename_rotated(), std::ios::out | std::ios::app);
-    stream << ss.str() << std::endl;
+    stream << this->message_prefix(_flag) << _message << std::endl;
     stream.flush();
     stream.close();
 
     if(this->get_file_size() > this->FILE_SIZE_LIMIT)
     {
-        std::stringstream ss2;
-        ss2 << "[" << Timer::current_time() << "] " << this->INFO << ": Rotated log to rotation " << this->get_filename_rotated() << std::endl;
-        std::cout << ss2.str() << std::endl;
+        std::stringstream ss;
+        ss << this->message_prefix(_flag) << ": Rotated log to rotation " << this->get_filename_rotated();
+        std::cout << ss.str() << std::endl;
 
         this->rotate_log();
         stream.open(this->get_filename_rotated(), std::ios::out | std::ios::app);
-        stream << ss2.str() << std::endl;
+        stream << ss.str() << std::endl;
         stream.flush();
         stream.close();
     }
 #endif
+}
+
+std::string Logger::message_prefix(const std::string _flag)
+{
+    return "[" + Timer::current_time() + "] " + _flag + ": ";
 }
