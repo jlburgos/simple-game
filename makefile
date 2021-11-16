@@ -124,7 +124,7 @@ wasm:
 		--name simple-game-wasm-build \
 		--volume $(CWD):/simple-game \
 		emscripten/emsdk /bin/bash -c \
-			'pip install requests && em++ $(WASM_OPTS) /simple-game/src/*.cpp -o /simple-game/bin/game.html'
+			'pip install requests && em++ /simple-game/src/*.cpp -o /simple-game/bin/game.html $(WASM_OPTS)'
 
 clean:
 	$(RM) $(BIN_DIR)
