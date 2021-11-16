@@ -13,7 +13,7 @@ CXX_STD=-std=c++17
 ## CWD
 ## Need to determine absolute project directory path
 ifeq ($(OS), Windows_NT)
-CWD=$(shell powershell (pwd).path)
+CWD=$(shell powershell (Get-Location).path)
 else
 CWD=$(shell pwd)
 endif
