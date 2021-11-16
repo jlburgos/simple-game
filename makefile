@@ -14,8 +14,10 @@ CXX_STD=-std=c++17
 ## Need to determine absolute project directory path
 ifeq ($(OS), Windows_NT)
 CWD=$(shell powershell (Get-Location).path)
+ROOT_DIR=$(shell powershell (Get-Item -Path $(CWD)).BaseName)
 else
 CWD=$(shell pwd)
+ROOT_DIR=$(shell pwd | rev | cut -d'/' -f1 | rev)
 endif
 
 ## Binary
@@ -119,10 +121,9 @@ assets:
 wasm:
 	docker run \
 		--rm \
-		--name simple-game-wasm-build \
-		--volume $(CWD):/simple-game \
+		--volume $(CWD):/$(ROOT_DIR) \
 		emscripten/emsdk /bin/bash -c \
-			'pip install requests && em++ /simple-game/src/*.cpp -o /simple-game/bin/game.html $(WASM_OPTS)'
+			'pip install requests && em++ /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)'
 
 clean:
 	$(RM) $(BIN_DIR)
