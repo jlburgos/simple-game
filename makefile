@@ -123,7 +123,7 @@ wasm:
 		--rm \
 		--volume $(CWD):/$(ROOT_DIR) \
 		emscripten/emsdk /bin/bash -c \
-			'pip install requests && em++ /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)'
+			"pip install requests && em++ /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
 
 clean:
 	$(RM) $(BIN_DIR)
