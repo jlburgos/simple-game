@@ -10,6 +10,14 @@ CXX=g++
 ## C++ standard
 CXX_STD=-std=c++17
 
+## CWD
+## Need to determine absolute project directory path
+ifeq ($(OS), Windows_NT)
+CWD=$(shell powershell (pwd).path)
+else
+CWD=$(shell pwd)
+endif
+
 ## Binary
 BIN_NAME=game
 BIN_DIR=bin
@@ -98,16 +106,6 @@ WASM_OPTS=\
 	$(CXX_STD) \
 	$(WASM_SDL_FLAGS) \
 	$(CXX_COMPILER_FLAGS)
-
-######################################################################################################
-######################################################################################################
-
-## Need to determine absolute project directory path
-ifeq ($(OS), Windows_NT)
-CWD=$(shell powershell (pwd).path)
-else
-CWD=$(shell pwd)
-endif
 
 ######################################################################################################
 ######################################################################################################
