@@ -38,10 +38,10 @@ SDL_FLAGS=\
 	-l SDL2 \
 	-l SDL2_image \
 	-l SDL2_ttf \
-	-I src/external-dep/SDL2/inc
+	-I external-dep/SDL2/inc
 ifeq ($(OS), Windows_NT)
 SDL_FLAGS+=\
-	-L src/external-dep/SDL2/lib
+	-L external-dep/SDL2/lib
 endif
 
 
