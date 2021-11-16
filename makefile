@@ -24,12 +24,16 @@ PRE_COMP_ASSETS=src/pre-compiled-assets
 
 ## SDL Flags
 SDL_FLAGS=\
-	-I src/external-dep/SDL2/inc \
-	-L src/external-dep/SDL2/lib \
 	-l SDL2main \
 	-l SDL2 \
 	-l SDL2_image \
-	-l SDL2_ttf
+	-l SDL2_ttf \
+	-I src/external-dep/SDL2/inc
+ifeq ($(OS), Windows_NT)
+SDL_FLAGS+=\
+	-L src/external-dep/SDL2/lib
+endif
+
 
 WASM_SDL_FLAGS=\
 	-s USE_SDL=2 \
