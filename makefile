@@ -104,9 +104,9 @@ WASM_OPTS=\
 
 ## Need to determine absolute project directory path
 ifeq ($(OS), Windows_NT)
-	CWD=$(shell powershell (pwd).path)
+CWD=$(shell powershell (pwd).path)
 else
-	CWD=$(shell pwd)
+CWD=$(shell pwd)
 endif
 
 ######################################################################################################
