@@ -4,8 +4,10 @@
 ######################################################################################################
 ######################################################################################################
 
-## Compiler
+## Compiler + Package Manager
 CXX=g++
+EMXX=em++
+PIP=pip
 
 ## C++ standard
 CXX_STD=-std=c++17
@@ -123,7 +125,7 @@ wasm:
 		--rm \
 		--volume $(CWD):/$(ROOT_DIR) \
 		emscripten/emsdk /bin/bash -c \
-			"pip install requests && em++ /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
+			"$(PIP) install requests && $(EMXX) /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
 
 clean:
 	$(RM) $(BIN_DIR)
