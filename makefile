@@ -129,13 +129,13 @@ wasm: tools assets
 		emscripten/emsdk /bin/bash -c \
 			"$(PIP) install requests && $(EMXX) /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
 
-assets: $(IMG_ASSETS)
 .PHONY: $(IMG_ASSETS)
+assets: $(IMG_ASSETS)
 $(IMG_ASSETS):
 	$(IMG_TO_HPP) $@ src/pre-compiled-assets/$(notdir $@).hpp
 
-tools: $(TOOLS)
 .PHONY: $(TOOLS)
+tools: $(TOOLS)
 $(TOOLS):
 	$(MAKE) -C $@
 
