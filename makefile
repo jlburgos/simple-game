@@ -119,17 +119,17 @@ WASM_OPTS=\
 ######################################################################################################
 ######################################################################################################
 
-default: tools img_assets
+default: tools assets
 	$(CXX) src/*.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
 
-wasm: tools img_assets
+wasm: tools assets
 	docker run \
 		--rm \
 		--volume $(CWD):/$(ROOT_DIR) \
 		emscripten/emsdk /bin/bash -c \
 			"$(PIP) install requests && $(EMXX) /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
 
-img_assets: $(IMG_ASSETS)
+assets: $(IMG_ASSETS)
 .PHONY: $(IMG_ASSETS)
 $(IMG_ASSETS):
 	$(IMG_TO_HPP) $@ src/pre-compiled-assets/$(notdir $@).hpp
