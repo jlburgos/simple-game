@@ -30,7 +30,9 @@ void write_out_file(const std::vector<unsigned int> &values, const struct out_na
     }
 
     std::stringstream ss;
-    ss << "unsigned char " << labels.name << "_" << labels.ext << "[] = {\n";
+    ss << "#ifndef __" << labels.name << "_" << labels.ext << "_HPP\n";
+    ss << "#define __" << labels.name << "_" << labels.ext << "_HPP\n\n";
+    ss << "unsigned char " << labels.name << "_" << labels.ext << "[] = {\n\t";
     for(size_t i = 0; i < values.size(); ++i)
     {
         std::stringstream ss2;
@@ -41,11 +43,12 @@ void write_out_file(const std::vector<unsigned int> &values, const struct out_na
         }
         if(i > 0 && i % 12 == 0)
         {
-            ss2 << "\n";
+            ss2 << "\n\t";
         }
         ss << ss2.str();
     }
-    ss << "\n};\nunsigned int " << labels.name << "_" << labels.ext << "_LEN = " << values.size() << ";" << std::endl;
+    ss << "\n};\n\nunsigned int " << labels.name << "_" << labels.ext << "_LEN = " << values.size() << ";\n\n";
+    ss << "#endif /* __" << labels.name << "_" << labels.ext << "_HPP */" << std::endl;
     ofs.write(ss.str().c_str(), ss.str().length());
     ofs.close();
     std::cout << "Generated out file: " << dst << std::endl;
