@@ -19,8 +19,8 @@
  * 
  */
 
-std::vector<unsigned int> convert_file(const std::string src);
-void write_file(const std::vector<unsigned int> &values, const struct out_name labels, const std::string dst);
+std::vector<unsigned int> convert_in_file(const std::string src);
+void write_out_file(const std::vector<unsigned int> &values, const struct out_name labels, const std::string dst);
 
 
 #endif /* __IMG_TO_HPP_HPP */

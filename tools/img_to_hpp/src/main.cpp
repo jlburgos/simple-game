@@ -24,13 +24,12 @@ int main(int argc, char *argv[])
     std::string src = argv[1];
     std::string dst = argv[2];
 
-    std::vector<unsigned int> values = convert_file(src);
+    std::vector<unsigned int> values = convert_in_file(src);
     if(values.empty())
     {
         return 2;
     }
-    write_file(values, get_out_name(src), dst);
-    std::cout << "Generated out file: " << dst << std::endl;
+    write_out_file(values, get_out_name(src), dst);
 
     return 0;
 }
