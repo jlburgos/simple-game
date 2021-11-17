@@ -9,7 +9,7 @@
 #include <iomanip>
 
 /**
- * @file methods.hpp
+ * @file img_to_hpp.hpp
  * @author your name (you@domain.com)
  * @brief 
  * @version 0.1
