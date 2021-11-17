@@ -1,3 +1,5 @@
 .vscode
-bin/game*
 node_modules
+
+bin/simple-game*
+tools/**/bin/*
