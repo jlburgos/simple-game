@@ -1,7 +1,7 @@
 #include "img_to_hpp.hpp"
 #include "out_name.hpp"
 
-std::vector<unsigned int> convert_file(const std::string src)
+std::vector<unsigned int> convert_in_file(const std::string src)
 {
     std::vector<unsigned int> values;
     std::ifstream stream;
@@ -19,7 +19,7 @@ std::vector<unsigned int> convert_file(const std::string src)
     return values;
 }
 
-void write_file(const std::vector<unsigned int> &values, const struct out_name labels, const std::string dst)
+void write_out_file(const std::vector<unsigned int> &values, const struct out_name labels, const std::string dst)
 {
     std::ofstream stream;
     stream.open(dst, std::ios::out | std::ios::trunc);
@@ -48,4 +48,5 @@ void write_file(const std::vector<unsigned int> &values, const struct out_name l
     ss << "\n};\nunsigned int " << labels.name << "_" << labels.ext << "_LEN = " << values.size() << ";" << std::endl;
     stream.write(ss.str().c_str(), ss.str().length());
     stream.close();
+    std::cout << "Generated out file: " << dst << std::endl;
 }
