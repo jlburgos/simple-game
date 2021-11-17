@@ -59,7 +59,6 @@ WASM_SDL_FLAGS=\
 	-s SDL2_IMAGE_FORMATS="[png,bmp,jpg]" \
 	-s LLD_REPORT_UNDEFINED \
 	-s WASM=1 \
-	-flto \
 	-v \
 	--closure 1 \
 	--minify 0 \
