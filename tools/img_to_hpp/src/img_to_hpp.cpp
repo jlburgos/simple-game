@@ -4,26 +4,26 @@
 std::vector<unsigned int> convert_in_file(const std::string src)
 {
     std::vector<unsigned int> values;
-    std::ifstream stream;
-    stream.open(src, std::ios::in | std::ios::binary);
-    if(!stream.is_open())
+    std::ifstream ifs;
+    ifs.open(src, std::ios::in | std::ios::binary);
+    if(!ifs.is_open())
     {
         std::cout << "Failed to open src file " << src << std::endl;
         return values;
     }
-    while(stream.good())
+    while(ifs.good())
     {
-        values.push_back(static_cast<unsigned int>(stream.get()));
+        values.push_back(static_cast<unsigned int>(ifs.get()));
     }
-    stream.close();
+    ifs.close();
     return values;
 }
 
 void write_out_file(const std::vector<unsigned int> &values, const struct out_name labels, const std::string dst)
 {
-    std::ofstream stream;
-    stream.open(dst, std::ios::out | std::ios::trunc);
-    if(!stream.is_open())
+    std::ofstream ofs;
+    ofs.open(dst, std::ios::out | std::ios::trunc);
+    if(!ofs.is_open())
     {
         std::cout << "Failed to open dst file " << dst << std::endl;
         return;
@@ -46,7 +46,7 @@ void write_out_file(const std::vector<unsigned int> &values, const struct out_na
         ss << ss2.str();
     }
     ss << "\n};\nunsigned int " << labels.name << "_" << labels.ext << "_LEN = " << values.size() << ";" << std::endl;
-    stream.write(ss.str().c_str(), ss.str().length());
-    stream.close();
+    ofs.write(ss.str().c_str(), ss.str().length());
+    ofs.close();
     std::cout << "Generated out file: " << dst << std::endl;
 }
