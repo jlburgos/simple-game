@@ -33,7 +33,7 @@ void write_out_file(const std::vector<unsigned int> &values, const struct out_na
     ss << "#ifndef __" << labels.name << "_" << labels.ext << "_HPP\n";
     ss << "#define __" << labels.name << "_" << labels.ext << "_HPP\n\n";
     ss << "unsigned char " << labels.name << "_" << labels.ext << "[] = {\n\t";
-    for(size_t i = 0; i < values.size(); ++i)
+    for(std::size_t i = 0; i < values.size(); ++i)
     {
         std::stringstream ss2;
         ss2 << std::setfill('0') << std::setw(2) << "0x" << std::hex << (0xff & values[i]);
