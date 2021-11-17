@@ -26,7 +26,14 @@ private:
     // std::unique_ptr<SDL_Window> window;
     // std::unique_ptr<SDL_Surface> surface;
     SDL_Window *window;
-    SDL_Surface *surface;
+    SDL_Renderer *renderer;
+
+    SDL_RWops *rw_apple;
+    SDL_RWops *rw_plant;
+    SDL_Surface *surface_apple;
+    SDL_Surface *surface_plant;
+    SDL_Texture *texture_apple;
+    SDL_Texture *texture_plant;
 
 public:
     WindowManager();

@@ -4,7 +4,7 @@
 ######################################################################################################
 ######################################################################################################
 
-## Compiler + Package Manager
+## Tools
 CXX=g++
 EMXX=em++
 PIP=pip
@@ -23,13 +23,18 @@ ROOT_DIR=$(shell pwd | rev | cut -d'/' -f1 | rev)
 endif
 
 ## Binary
-BIN_NAME=game
+BIN_NAME=$(ROOT_DIR)
 BIN_DIR=bin
 
 ## Assets
-RESOURCES=resources
-IMG_ASSETS=$(RESOURCES)/imgs
+RESOURCES=assets
+IMG_ASSETS=$(wildcard $(RESOURCES)/test-imgs/*)
 PRE_COMP_ASSETS=src/pre-compiled-assets
+
+## Tools
+IMG_TO_HPP=tools/img_to_hpp/bin/img_to_hpp
+#TOOLS=$(wildcard tools/*)
+TOOLS=$(wildcard tools/img_to_hpp)
 
 ######################################################################################################
 ######################################################################################################
@@ -114,18 +119,24 @@ WASM_OPTS=\
 ######################################################################################################
 ######################################################################################################
 
-default:
+default: tools img_assets
 	$(CXX) src/*.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
 
-assets:
-	## TODO: Write loop that handles xxd.exe
-
-wasm:
+wasm: tools img_assets
 	docker run \
 		--rm \
 		--volume $(CWD):/$(ROOT_DIR) \
 		emscripten/emsdk /bin/bash -c \
 			"$(PIP) install requests && $(EMXX) /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
 
-clean:
-	$(RM) $(BIN_DIR)
+img_assets: $(IMG_ASSETS)
+.PHONY: $(IMG_ASSETS)
+$(IMG_ASSETS):
+	$(IMG_TO_HPP) $@ src/pre-compiled-assets/$(notdir $@).hpp
+
+tools: $(TOOLS)
+.PHONY: $(TOOLS)
+$(TOOLS):
+	$(MAKE) -C $@
+
+all: tools img_assets default wasm

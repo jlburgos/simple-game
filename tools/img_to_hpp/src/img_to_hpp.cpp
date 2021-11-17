@@ -30,6 +30,8 @@ void write_file(const std::vector<unsigned int> &values, const struct out_name l
     }
 
     std::stringstream ss;
+    ss << "#ifndef __" << labels.name << "_" << labels.ext << "_HPP\n";
+    ss << "#define __" << labels.name << "_" << labels.ext << "_HPP\n\n\n";
     ss << "unsigned char " << labels.name << "_" << labels.ext << "[] = {\n";
     for(size_t i = 0; i < values.size(); ++i)
     {
@@ -45,7 +47,8 @@ void write_file(const std::vector<unsigned int> &values, const struct out_name l
         }
         ss << ss2.str();
     }
-    ss << "\n};\nunsigned int " << labels.name << "_" << labels.ext << "_LEN = " << values.size() << ";" << std::endl;
+    ss << "\n};\n\nunsigned int " << labels.name << "_" << labels.ext << "_LEN = " << values.size() << ";\n\n\n";
+    ss << "#endif /* __" << labels.name << "_" << labels.ext << "_HPP */" << std::endl;;
     stream.write(ss.str().c_str(), ss.str().length());
     stream.close();
 }
