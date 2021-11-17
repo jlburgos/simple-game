@@ -3,18 +3,32 @@
 
 std::vector<unsigned int> convert_in_file(const std::string src)
 {
-    std::vector<unsigned int> values;
     std::ifstream ifs;
-    ifs.open(src, std::ios::in | std::ios::binary);
+    ifs.open(src, std::ifstream::in | std::ifstream::binary);
     if(!ifs.is_open())
     {
         std::cout << "Failed to open src file " << src << std::endl;
-        return values;
+        return std::vector<unsigned int>();
     }
-    while(ifs.good())
+
+    ifs.seekg(0, std::ifstream::end);
+    unsigned int file_size = static_cast<unsigned int>(ifs.tellg()) + 1;
+    ifs.seekg(0, std::ifstream::beg);
+
+    std::vector<unsigned int> values(file_size);
+    std::vector<unsigned int>::iterator it = values.begin();
+    for(it = values.begin(); ifs.good() && it != values.end(); ++it)
     {
-        values.push_back(static_cast<unsigned int>(ifs.get()));
+        *it = static_cast<unsigned int>(ifs.get());
     }
+
+    if(!ifs.eof())
+    {
+        std::cout << "Failed to read in whole file! Stopped at position " << static_cast<unsigned int>(ifs.tellg()) << " with rdstate " << ifs.rdstate() << std::endl;
+        ifs.close();
+        return std::vector<unsigned int>();
+    }
+
     ifs.close();
     return values;
 }
@@ -22,7 +36,7 @@ std::vector<unsigned int> convert_in_file(const std::string src)
 void write_out_file(const std::vector<unsigned int> &values, const struct out_name labels, const std::string dst)
 {
     std::ofstream ofs;
-    ofs.open(dst, std::ios::out | std::ios::trunc);
+    ofs.open(dst, std::ofstream::out | std::ofstream::trunc);
     if(!ofs.is_open())
     {
         std::cout << "Failed to open dst file " << dst << std::endl;
