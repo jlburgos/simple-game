@@ -27,9 +27,8 @@ int main(int argc, char *argv[])
     std::vector<unsigned int> values = convert_in_file(src);
     if(values.empty())
     {
-        return 2;
+        return 1;
     }
-    write_out_file(values, get_out_name(src), dst);
 
-    return 0;
+    return write_out_file(values, get_out_name(src), dst);
 }

@@ -33,14 +33,14 @@ std::vector<unsigned int> convert_in_file(const std::string src)
     return values;
 }
 
-void write_out_file(const std::vector<unsigned int> &values, const struct out_name labels, const std::string dst)
+bool write_out_file(const std::vector<unsigned int> &values, const struct out_name labels, const std::string dst)
 {
     std::ofstream ofs;
     ofs.open(dst, std::ofstream::out | std::ofstream::trunc);
     if(!ofs.is_open())
     {
         std::cout << "Failed to open dst file " << dst << std::endl;
-        return;
+        return 1;
     }
 
     std::stringstream ss;
@@ -66,4 +66,5 @@ void write_out_file(const std::vector<unsigned int> &values, const struct out_na
     ofs.write(ss.str().c_str(), ss.str().length());
     ofs.close();
     std::cout << "Generated out file: " << dst << std::endl;
+    return 0;
 }
