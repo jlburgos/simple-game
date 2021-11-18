@@ -47,21 +47,25 @@ bool write_out_file(const std::vector<unsigned int> &values, const struct out_na
     ss << "#ifndef __" << labels.name << "_" << labels.ext << "_HPP\n";
     ss << "#define __" << labels.name << "_" << labels.ext << "_HPP\n\n";
     ss << "unsigned char " << labels.name << "_" << labels.ext << "[] = {\n\t";
+    ofs.write(ss.str().c_str(), ss.str().length());
+    ss.str(std::string());
+    ss.clear();
     for(std::size_t i = 0; i < values.size(); ++i)
     {
-        std::stringstream ss2;
-        ss2 << std::setfill('0') << std::setw(2) << "0x" << std::hex << (0xff & values[i]);
+        ss << std::setfill('0') << std::setw(2) << "0x" << std::hex << (0xff & values[i]);
         if(i + 1 != values.size())
         {
-            ss2 << ", ";
+            ss << ", ";
         }
         if(i > 0 && i % 12 == 0)
         {
-            ss2 << "\n\t";
+            ss << "\n\t";
         }
-        ss << ss2.str();
+        ofs.write(ss.str().c_str(), ss.str().length());
+        ss.str(std::string());
+        ss.clear();
     }
-    ss << "\n};\n\nunsigned int " << labels.name << "_" << labels.ext << "_LEN = " << values.size() << ";\n\n";
+    ss << "\n};\n\nunsigned int " << labels.name << "_" << labels.ext << "_LEN = " << std::dec << values.size() << ";\n\n";
     ss << "#endif /* __" << labels.name << "_" << labels.ext << "_HPP */" << std::endl;
     ofs.write(ss.str().c_str(), ss.str().length());
     ofs.close();
