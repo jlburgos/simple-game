@@ -82,7 +82,7 @@ void Logger::set_filename(const std::string &_filename)
  * 
  * @return std::string 
  */
-std::string Logger::get_filename_raw() const
+std::string Logger::get_filename_raw()
 {
     return this->filename;
 }
@@ -92,7 +92,7 @@ std::string Logger::get_filename_raw() const
  * 
  * @return std::string 
  */
-std::string Logger::get_filename_rotated() const
+std::string Logger::get_filename_rotated()
 {
     std::stringstream ss;
     ss << this->get_filename_raw() << "." << static_cast<int>(this->get_rotation()) << ".log";
@@ -113,7 +113,7 @@ void Logger::rotate_log()
  * 
  * @return unsigned int 
  */
-unsigned int Logger::get_rotation() const
+unsigned int Logger::get_rotation()
 {
     return this->rotation;
 }

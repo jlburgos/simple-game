@@ -51,13 +51,13 @@ private:
     Logger &operator=(const Logger &_logger);
 
     void set_filename(const std::string &_filename);
-    std::string get_filename_raw() const;
-    std::string get_filename_rotated() const;
+    std::string get_filename_raw();
+    std::string get_filename_rotated();
     unsigned int get_file_size();
     std::string get_file_path();
 
     void rotate_log();
-    unsigned int get_rotation() const;
+    unsigned int get_rotation();
     void set_rotation(unsigned int _rotation);
 
     void write_message_buffer(const std::string _message, const std::string _flag);
