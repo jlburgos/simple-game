@@ -10,7 +10,6 @@
  */
 
 #include <iostream>
-#include "out_name.hpp"
 #include "img_to_hpp.hpp"
 
 int main(int argc, char *argv[])
@@ -29,6 +28,7 @@ int main(int argc, char *argv[])
     {
         return 1;
     }
-
-    return write_out_file(values, get_out_name(src), dst);
+    struct out_name name = get_out_name(src);
+    return write_out_file(values, name, dst);
 }
+
