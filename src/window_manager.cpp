@@ -126,7 +126,6 @@ void WindowManager::start()
     // Fill the surface white
     //SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xFF, 0xFF, 0xFF));
 
-    bool switch_flag = false;
     while(true)
     {
         SDL_Event e;
@@ -138,17 +137,18 @@ void WindowManager::start()
             }
         }
         SDL_RenderClear(renderer);
-        if(switch_flag)
-        {
-            SDL_RenderCopy(renderer, texture_plant, NULL, NULL);
-        }
-        else
-        {
-            SDL_RenderCopy(renderer, texture_apple, NULL, NULL);
-        }
-        switch_flag = !switch_flag;
+        SDL_RenderCopy(renderer, texture_plant, NULL, NULL);
         SDL_RenderPresent(renderer);
+
         SDL_Delay(1E3);
+
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, texture_apple, NULL, NULL);
+        SDL_RenderPresent(renderer);
+
+        SDL_Delay(1E3);
+
+        break; // Avoid infinite loop for now
     }
 
     // Update the surface
