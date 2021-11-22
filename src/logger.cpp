@@ -21,7 +21,7 @@ Logger *Logger::logger = nullptr;                 // Initialize singleton pointe
  */
 Logger::Logger()
 {
-    filename = "game";
+    filename = get_file_path();
     rotation = 0;
 }
 
@@ -151,6 +151,30 @@ unsigned int Logger::get_file_size()
         this->error(ss.str());
     }
     return file_size;
+}
+
+/**
+ * @brief
+ *
+ * @return std::string
+ */
+std::string Logger::get_file_path()
+{
+  char buffer[256];
+  ssize_t length = sizeof(buffer);
+#ifdef __linux__
+  ssize_t ret_length = readlink("/proc/self/exe", buffer, length);
+  ssize_t num_bytes = std::min(ret_length, length-1);
+#elif __WIN32
+  int num_bytes = GetModuleFileName(NULL, buffer, length);
+#else
+#error "Expected either Linux or Windows platform!"
+#endif
+  if(num_bytes != -1)
+  {
+    buffer[num_bytes] = '\0';
+  }
+  return std::string(buffer);
 }
 
 /**

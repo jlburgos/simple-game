@@ -16,6 +16,10 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef __linux__
+#include <unistd.h>
+#endif
+
 #include "timer.hpp"
 
 // TODO :: Add std::mutex if parallel access to file is needed
@@ -50,6 +54,7 @@ private:
     std::string get_filename_raw() const;
     std::string get_filename_rotated() const;
     unsigned int get_file_size();
+    std::string get_file_path();
 
     void rotate_log();
     unsigned int get_rotation() const;
