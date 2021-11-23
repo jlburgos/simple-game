@@ -1,0 +1,11 @@
+# Ignore self
+#.gitignore
+
+# Ignore binaries
+bin/simple-game*
+!bin/*dll
+!bin/README.md
+
+# Ignore tools
+tools/**/bin/*
+!tools/**/bin/README.md
