@@ -19,30 +19,28 @@
 class WindowManager
 {
 private:
-    const std::string DEFAULT_SCREEN_TITLE = "Game Window";
-    const int DEFAULT_SCREEN_WIDTH = 720;
-    const int DEFAULT_SCREEN_HEIGHT = 480;
-
+    static const std::string DEFAULT_SCREEN_TITLE;
+    static const int DEFAULT_SCREEN_WIDTH;
+    static const int DEFAULT_SCREEN_HEIGHT;
     // std::unique_ptr<SDL_Window> window;
     // std::unique_ptr<SDL_Surface> surface;
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-
-    SDL_RWops *rw_apple;
-    SDL_RWops *rw_plant;
-    SDL_Surface *surface_apple;
-    SDL_Surface *surface_plant;
-    SDL_Texture *texture_apple;
-    SDL_Texture *texture_plant;
+    static SDL_Window *window;
+    static SDL_Renderer *renderer;
+    static SDL_RWops *rw_apple;
+    static SDL_RWops *rw_plant;
+    static SDL_Surface *surface_apple;
+    static SDL_Surface *surface_plant;
+    static SDL_Texture *texture_apple;
+    static SDL_Texture *texture_plant;
 
 public:
     WindowManager();
     WindowManager(const WindowManager &);
     WindowManager &operator=(const WindowManager &);
     ~WindowManager();
-    int init();
-    void start();
-    void close();
+    static int init();
+    static void start();
+    static void close();
 };
 
 #endif /* _WINDOW_MANAGER_HPP */

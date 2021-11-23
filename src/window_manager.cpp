@@ -13,6 +13,20 @@
 #include "window_manager.hpp"
 #include <cstdio>
 
+// Define static members
+const std::string WindowManager::DEFAULT_SCREEN_TITLE = "Game Window";
+const int WindowManager::DEFAULT_SCREEN_WIDTH = 720;
+const int WindowManager::DEFAULT_SCREEN_HEIGHT = 480;
+
+SDL_Window *WindowManager::window = nullptr;
+SDL_Renderer *WindowManager::renderer = nullptr;
+SDL_RWops *WindowManager::rw_apple = nullptr;
+SDL_RWops *WindowManager::rw_plant = nullptr;
+SDL_Surface *WindowManager::surface_apple = nullptr;
+SDL_Surface *WindowManager::surface_plant = nullptr;
+SDL_Texture *WindowManager::texture_apple = nullptr;
+SDL_Texture *WindowManager::texture_plant = nullptr;
+
 /**
  * @brief Construct a new Window Manager:: Window Manager object
  * 
@@ -72,11 +86,11 @@ int WindowManager::init()
         fprintf(stderr, "Failed to initialize SDL2_image: %s\n", SDL_GetError());
     }
     // Create window
-    this->window = SDL_CreateWindow(this->DEFAULT_SCREEN_TITLE.c_str(),
-                                    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                    this->DEFAULT_SCREEN_WIDTH, this->DEFAULT_SCREEN_HEIGHT,
-                                    SDL_WINDOW_SHOWN);
-    if (this->window == nullptr)
+    window = SDL_CreateWindow(DEFAULT_SCREEN_TITLE.c_str(),
+                              SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                              DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
+                              SDL_WINDOW_SHOWN);
+    if (window == nullptr)
     {
         fprintf(stderr, "Failed to create SDL_Window! SDL_Error: %s\n", SDL_GetError());
         return 2;
@@ -84,15 +98,15 @@ int WindowManager::init()
     // Get window surface
     //surface = SDL_GetWindowSurface(this->window);
 
-    renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if(renderer == nullptr)
     {
         fprintf(stderr, "Failed to create SDL_Renderer! SDL_Error: %s\n", SDL_GetError());
         return 3;
     }
 
-    rw_apple = SDL_RWFromConstMem(APPLE_PNG, APPLE_PNG_LEN);
-    rw_plant = SDL_RWFromConstMem(PLANT_JPEG, PLANT_JPEG_LEN);
+    rw_apple = SDL_RWFromConstMem(APPLE_PNG, static_cast<int>(APPLE_PNG_LEN));
+    rw_plant = SDL_RWFromConstMem(PLANT_JPEG, static_cast<int>(PLANT_JPEG_LEN));
     surface_apple = IMG_LoadPNG_RW(rw_apple);
     if(surface_apple == nullptr)
     {
@@ -125,7 +139,7 @@ void WindowManager::start()
 {
     // Fill the surface white
     //SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xFF, 0xFF, 0xFF));
-
+#if !defined(__EMSCRIPTEN_major__)
     bool switch_flag = false;
     while(true)
     {
@@ -137,6 +151,9 @@ void WindowManager::start()
                 break;
             }
         }
+#else
+    static bool switch_flag = false;
+#endif
         SDL_RenderClear(renderer);
         if(switch_flag)
         {
@@ -149,8 +166,12 @@ void WindowManager::start()
         switch_flag = !switch_flag;
         SDL_RenderPresent(renderer);
         SDL_Delay(1E3);
+#if !defined(__EMSCRIPTEN_major__)
     }
-
+#else
+    SDL_DestroyTexture(texture_apple);
+    SDL_DestroyTexture(texture_plant);
+#endif
     // Update the surface
     //SDL_UpdateWindowSurface(this->window);
 
@@ -168,6 +189,6 @@ void WindowManager::close()
     SDL_DestroyTexture(texture_apple);
     SDL_DestroyTexture(texture_plant);
     SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(this->window);
+    SDL_DestroyWindow(window);
     SDL_Quit();
 }
