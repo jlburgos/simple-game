@@ -135,6 +135,7 @@ int WindowManager::init()
  * @brief 
  * 
  */
+/*
 void WindowManager::start()
 {
     // Fill the surface white
@@ -155,23 +156,63 @@ void WindowManager::start()
     static bool switch_flag = false;
 #endif
         SDL_RenderClear(renderer);
-        if(switch_flag)
-        {
-            SDL_RenderCopy(renderer, texture_plant, NULL, NULL);
-        }
-        else
-        {
-            SDL_RenderCopy(renderer, texture_apple, NULL, NULL);
-        }
-        switch_flag = !switch_flag;
+        SDL_RenderCopy(renderer, texture_plant, NULL, NULL);
         SDL_RenderPresent(renderer);
+
         SDL_Delay(1E3);
-#if !defined(__EMSCRIPTEN_major__)
+
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, texture_apple, NULL, NULL);
+        SDL_RenderPresent(renderer);
+
+        SDL_Delay(1E3);
+
+        break; // Avoid infinite loop for now
     }
-#else
+
     SDL_DestroyTexture(texture_apple);
     SDL_DestroyTexture(texture_plant);
-#endif
+
+    // Update the surface
+    //SDL_UpdateWindowSurface(this->window);
+
+    // Wait for a bit
+    //SDL_Delay(3E3);
+}
+*/
+void WindowManager::start()
+{
+    // Fill the surface white
+    //SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xFF, 0xFF, 0xFF));
+    bool switch_flag = false;
+    while(true)
+    {
+        SDL_Event e;
+        if(SDL_WaitEvent(&e))
+        {
+            if(e.type == SDL_QUIT)
+            {
+                break;
+            }
+        }
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, texture_plant, NULL, NULL);
+        SDL_RenderPresent(renderer);
+
+        SDL_Delay(1E3);
+
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, texture_apple, NULL, NULL);
+        SDL_RenderPresent(renderer);
+
+        SDL_Delay(1E3);
+
+        break; // Avoid infinite loop for now
+    }
+
+    SDL_DestroyTexture(texture_apple);
+    SDL_DestroyTexture(texture_plant);
+
     // Update the surface
     //SDL_UpdateWindowSurface(this->window);
 

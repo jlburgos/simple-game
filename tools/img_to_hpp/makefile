@@ -41,7 +41,7 @@ CXX_COMPILER_FLAGS=\
 	-Werror -Wfloat-equal -Wformat=2 \
 	-Wformat-nonliteral -Wformat-security  \
 	-Wformat-y2k \
-	-Wimport  -Winit-self  -Winline \
+	-Wimport  -Winit-self \
 	-Wlong-long \
 	-Wmissing-field-initializers -Wmissing-format-attribute \
 	-Wmissing-include-dirs -Wmissing-noreturn \

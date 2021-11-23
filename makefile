@@ -118,8 +118,7 @@ WASM_OPTS=\
 ######################################################################################################
 ######################################################################################################
 
-default: tools assets
-	$(CXX) src/*.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
+default: tools assets simple-game
 
 wasm: tools assets
 	docker run \
@@ -127,6 +126,10 @@ wasm: tools assets
 		--volume $(CWD):/$(ROOT_DIR) \
 		emscripten/emsdk /bin/bash -c \
 			"$(PIP) install requests && $(EMXX) /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
+
+.PHONY: simple-game
+simple-game:
+	$(CXX) src/*.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
 
 .PHONY: $(IMG_ASSETS)
 assets: $(IMG_ASSETS)

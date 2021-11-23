@@ -7,6 +7,7 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 
 /**
  * @file img_to_hpp.hpp
@@ -19,8 +20,13 @@
  * 
  */
 
+struct out_name {
+    std::string name;
+    std::string ext;
+};
+
+struct out_name get_out_name(const std::string src);
 std::vector<unsigned int> convert_in_file(const std::string src);
 bool write_out_file(const std::vector<unsigned int> &values, const struct out_name labels, const std::string dst);
-
 
 #endif /* __IMG_TO_HPP_HPP */
