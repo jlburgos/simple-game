@@ -9,18 +9,17 @@
  * 
  */
 
-#include "window_manager.hpp"
 #include <cstdio>
+
+#include "window_manager.hpp"
+#include "util/logger.hpp"
 
 // Define static members
 const std::string WindowManager::DEFAULT_SCREEN_TITLE = "Game Window";
 const int WindowManager::DEFAULT_SCREEN_WIDTH = 720;
 const int WindowManager::DEFAULT_SCREEN_HEIGHT = 480;
-
 SDL_Window *WindowManager::window = nullptr;
 SDL_Renderer *WindowManager::renderer = nullptr;
-SDL_RWops *WindowManager::rw_apple = nullptr;
-SDL_RWops *WindowManager::rw_plant = nullptr;
 SDL_Surface *WindowManager::surface_apple = nullptr;
 SDL_Surface *WindowManager::surface_plant = nullptr;
 SDL_Texture *WindowManager::texture_apple = nullptr;
@@ -32,30 +31,6 @@ SDL_Texture *WindowManager::texture_plant = nullptr;
  */
 WindowManager::WindowManager()
 {
-}
-
-/**
- * @brief Construct a new Window Manager:: Window Manager object
- * 
- * @param mgr 
- */
-WindowManager::WindowManager(const WindowManager &mgr)
-{
-    // This is not to be used!
-    (void)mgr;
-}
-
-/**
- * @brief 
- * 
- * @param mgr 
- * @return WindowManager& 
- */
-WindowManager& WindowManager::operator=(const WindowManager &mgr)
-{
-    // This is not to be used!
-    (void)mgr;
-    return *this;
 }
 
 /**
@@ -151,55 +126,6 @@ int WindowManager::init()
     return 0;
 }
 
-/**
- * @brief 
- * 
- */
-/*
-void WindowManager::start()
-{
-    // Fill the surface white
-    //SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xFF, 0xFF, 0xFF));
-#if !defined(__EMSCRIPTEN_major__)
-    bool switch_flag = false;
-    while(true)
-    {
-        SDL_Event e;
-        if(SDL_WaitEvent(&e))
-        {
-            if(e.type == SDL_QUIT)
-            {
-                break;
-            }
-        }
-#else
-    static bool switch_flag = false;
-#endif
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture_plant, NULL, NULL);
-        SDL_RenderPresent(renderer);
-
-        SDL_Delay(1E3);
-
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture_apple, NULL, NULL);
-        SDL_RenderPresent(renderer);
-
-        SDL_Delay(1E3);
-
-        break; // Avoid infinite loop for now
-    }
-
-    SDL_DestroyTexture(texture_apple);
-    SDL_DestroyTexture(texture_plant);
-
-    // Update the surface
-    //SDL_UpdateWindowSurface(this->window);
-
-    // Wait for a bit
-    //SDL_Delay(3E3);
-}
-*/
 void WindowManager::start()
 {
     // Fill the surface white
