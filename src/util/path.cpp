@@ -41,11 +41,6 @@ std::string PathNS::get_exe_path()
     {
         throw PathException("Failed in GetModuleFileNameA call!");
     }
-    if (num_bytes >= max_size)
-    {
-        throw PathException("Path to executable is longer than expected!");
-    }
-    buffer[num_bytes] = '\0';
     return std::string(buffer);
 }
 
