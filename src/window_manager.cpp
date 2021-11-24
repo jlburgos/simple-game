@@ -9,7 +9,6 @@
  * 
  */
 
-#include "pre-compiled-assets/assets.hpp"
 #include "window_manager.hpp"
 #include <cstdio>
 
@@ -205,7 +204,6 @@ void WindowManager::start()
 {
     // Fill the surface white
     //SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xFF, 0xFF, 0xFF));
-    bool switch_flag = false;
     while(true)
     {
         SDL_Event e;
