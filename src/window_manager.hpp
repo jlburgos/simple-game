@@ -12,9 +12,17 @@
  *
  */
 
-#include "headers.hpp"
 #include <string>
 //#include <memory>
+
+#ifdef __linux__
+#include <unistd.h>
+#elif defined(__WIN32)
+#include <windows.h>
+#define sleep(x) Sleep(1000 * (x))
+#endif
+
+#include "headers.hpp"
 
 class WindowManager
 {

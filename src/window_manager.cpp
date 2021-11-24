@@ -78,12 +78,17 @@ int WindowManager::init()
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
-        fprintf(stderr, "Failed to init SDL_INIT_VIDEO: %s\n", SDL_GetError());
+        LOG.error("Failed to initialize SDL support!");
+        LOG.error(SDL_GetError());
+        SDL_ClearError();
         return 1;
     }
     if (IMG_Init(IMG_INIT_PNG) == 0)
     {
-        fprintf(stderr, "Failed to initialize SDL2_image: %s\n", SDL_GetError());
+        LOG.error("Failed to initialize SDL Image support!");
+        LOG.error(SDL_GetError());
+        SDL_ClearError();
+        return 1;
     }
     // Create window
     window = SDL_CreateWindow(DEFAULT_SCREEN_TITLE.c_str(),
@@ -92,7 +97,9 @@ int WindowManager::init()
                               SDL_WINDOW_SHOWN);
     if (window == nullptr)
     {
-        fprintf(stderr, "Failed to create SDL_Window! SDL_Error: %s\n", SDL_GetError());
+        LOG.error("Failed to create SDL_Window!");
+        LOG.error(SDL_GetError());
+        SDL_ClearError();
         return 2;
     }
     // Get window surface
@@ -101,31 +108,45 @@ int WindowManager::init()
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if(renderer == nullptr)
     {
-        fprintf(stderr, "Failed to create SDL_Renderer! SDL_Error: %s\n", SDL_GetError());
+        LOG.error("Failed to create SDL_Renderer!");
+        LOG.error(SDL_GetError());
+        SDL_ClearError();
         return 3;
     }
 
-    rw_apple = SDL_RWFromConstMem(APPLE_PNG, static_cast<int>(APPLE_PNG_LEN));
-    rw_plant = SDL_RWFromConstMem(PLANT_JPEG, static_cast<int>(PLANT_JPEG_LEN));
-    surface_apple = IMG_LoadPNG_RW(rw_apple);
+    //rw_apple = SDL_RWFromConstMem(APPLE_PNG, static_cast<int>(APPLE_PNG_LEN));
+    //surface_apple = IMG_LoadPNG_RW(rw_apple);
+    surface_apple = IMG_Load("./assets/test-imgs/apple.png");
     if(surface_apple == nullptr)
     {
-        fprintf(stderr, "Failed to create apple surface: %s\n", SDL_GetError());
+        LOG.error("Failed to create apple surface!");
+        LOG.error(SDL_GetError());
+        SDL_ClearError();
     }
-    surface_plant = IMG_LoadJPG_RW(rw_plant);
+    //rw_plant = SDL_RWFromConstMem(PLANT_JPEG, static_cast<int>(PLANT_JPEG_LEN));
+    //surface_plant = IMG_LoadJPG_RW(rw_plant);
+    surface_plant = IMG_Load("./assets/test-imgs/plant.jpeg");
     if(surface_plant == nullptr)
     {
-        fprintf(stderr, "Failed to create plant surface: %s\n", SDL_GetError());
+        LOG.error("Failed to create plant surface!");
+        LOG.error(SDL_GetError());
+        SDL_ClearError();
     }
+    IMG_Quit();
+
     texture_apple = SDL_CreateTextureFromSurface(renderer, surface_apple);
     if(texture_apple == nullptr)
     {
-        fprintf(stderr, "Failed to create apple texture: %s\n", SDL_GetError());
+        LOG.error("Failed to create apple texture!");
+        LOG.error(SDL_GetError());
+        SDL_ClearError();
     }
     texture_plant = SDL_CreateTextureFromSurface(renderer, surface_plant);
     if(texture_plant == nullptr)
     {
-        fprintf(stderr, "Failed to create plant texture: %s\n", SDL_GetError());
+        LOG.error("Failed to create plant texture!");
+        LOG.error(SDL_GetError());
+        SDL_ClearError();
     }
 
     return 0;
