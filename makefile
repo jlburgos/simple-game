@@ -131,14 +131,17 @@ wasm: tools assets
 simple-game:
 	$(CXX) src/*.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
 
-.PHONY: $(IMG_ASSETS)
-assets: $(IMG_ASSETS)
-$(IMG_ASSETS):
-	$(IMG_TO_HPP) $@ src/pre-compiled-assets/$(notdir $@).hpp
+## Note: Disabling asset compile pipeline experiments for now
 
-.PHONY: $(TOOLS)
-tools: $(TOOLS)
-$(TOOLS):
-	$(MAKE) -C $@
+#.PHONY: $(IMG_ASSETS)
+#assets: $(IMG_ASSETS)
+#$(IMG_ASSETS):
+#	$(IMG_TO_HPP) $@ src/pre-compiled-assets/$(notdir $@).hpp
 
-all: tools img_assets default wasm
+#.PHONY: $(TOOLS)
+#tools: $(TOOLS)
+#$(TOOLS):
+#	$(MAKE) -C $@
+
+#all: tools img_assets default wasm
+all: default wasm
