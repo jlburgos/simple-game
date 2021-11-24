@@ -160,21 +160,28 @@ unsigned int Logger::get_file_size()
  */
 std::string Logger::get_file_path()
 {
-  char buffer[256];
-  ssize_t length = sizeof(buffer);
+    char buffer[256];
 #ifdef __linux__
-  ssize_t ret_length = readlink("/proc/self/exe", buffer, length);
-  ssize_t num_bytes = std::min(ret_length, length-1);
+    ssize_t length = sizeof(buffer);
+    ssize_t ret_length = readlink("/proc/self/exe", buffer, length);
+    ssize_t num_bytes = std::min(ret_length, length-1);
 #elif __WIN32
-  int num_bytes = GetModuleFileName(NULL, buffer, length);
+    /* Not calling GetModuleFileName(..) since it resolves to GetModuleFIleNameW since UNICODE is defined.
+     * that that would include UNICODE filename support which I don't want to deal with. So calling
+     * GetModuleFIleNameA(..) directly.
+     */
+    DWORD length = sizeof(buffer);
+    int num_bytes = GetModuleFileNameA(NULL, buffer, length);
 #else
 #error "Expected either Linux or Windows platform!"
 #endif
-  if(num_bytes != -1)
-  {
-    buffer[num_bytes] = '\0';
-  }
-  return std::string(buffer);
+    if(num_bytes != -1)
+    {
+        buffer[num_bytes] = '\0';
+    }
+    std::string path(buffer);
+    path.erase(path.rfind(".exe"));
+    return path;
 }
 
 /**
@@ -184,7 +191,7 @@ std::string Logger::get_file_path()
  */
 void Logger::info(const std::string _message)
 {
-    this->write_message_buffer(_message, this->INFO);
+    this->write_message_buffer(_message, this->PINFO);
 }
 
 /**
@@ -194,7 +201,7 @@ void Logger::info(const std::string _message)
  */
 void Logger::warn(const std::string _message)
 {
-    this->write_message_buffer(_message, this->WARN);
+    this->write_message_buffer(_message, this->PWARN);
 }
 
 /**
@@ -204,7 +211,7 @@ void Logger::warn(const std::string _message)
  */
 void Logger::error(const std::string _message)
 {
-    this->write_message_buffer(_message, this->ERROR);
+    this->write_message_buffer(_message, this->PERROR);
 }
 
 /**
