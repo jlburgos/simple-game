@@ -36,11 +36,10 @@ std::string PathNS::get_exe_path()
 #else
 #error "Expected either Linux or Windows platform!"
 #endif
-    if (num_bytes != -1)
+    if (num_bytes == -1)
     {
         throw PathException("Failed in GetModuleFileNameA call!");
     }
-    buffer[num_bytes] = '\0';
     return std::string(buffer);
 }
 
