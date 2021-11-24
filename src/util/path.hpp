@@ -13,6 +13,7 @@
 #define __PATH_HPP
 
 #include <string>
+#include <stdexcept>
 
 namespace PathNS
 {
