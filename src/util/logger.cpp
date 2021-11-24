@@ -9,6 +9,7 @@
  *
  */
 
+#include "path.hpp"
 #include "logger.hpp"
 #include "timer.hpp"
 
@@ -160,28 +161,7 @@ unsigned int Logger::get_file_size()
  */
 std::string Logger::get_file_path()
 {
-    char buffer[256];
-#ifdef __linux__
-    ssize_t length = sizeof(buffer);
-    ssize_t ret_length = readlink("/proc/self/exe", buffer, length);
-    ssize_t num_bytes = std::min(ret_length, length-1);
-#elif __WIN32
-    /* Not calling GetModuleFileName(..) since it resolves to GetModuleFIleNameW since UNICODE is defined.
-     * that that would include UNICODE filename support which I don't want to deal with. So calling
-     * GetModuleFIleNameA(..) directly.
-     */
-    DWORD length = sizeof(buffer);
-    int num_bytes = GetModuleFileNameA(NULL, buffer, length);
-#else
-#error "Expected either Linux or Windows platform!"
-#endif
-    if(num_bytes != -1)
-    {
-        buffer[num_bytes] = '\0';
-    }
-    std::string path(buffer);
-    path.erase(path.rfind(".exe"));
-    return path;
+    return PathNS::get_exe_path_no_ext(); // Using game binary (minus extension) as base for log file name
 }
 
 /**

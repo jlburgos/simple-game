@@ -16,14 +16,6 @@
 #include <iostream>
 #include <fstream>
 
-#ifdef __linux__
-#include <unistd.h>
-#elif defined(__WIN32)
-#include <windows.h>
-#endif
-
-#include "timer.hpp"
-
 // TODO :: Add std::mutex if parallel access to file is needed
 
 class Logger
