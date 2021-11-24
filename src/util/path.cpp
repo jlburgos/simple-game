@@ -33,7 +33,7 @@ std::string PathNS::get_exe_path()
      * GetModuleFIleNameA(..) directly.
      */
     DWORD length = sizeof(buffer);
-    int num_bytes = GetModuleFileNameA(NULL, buffer, length);
+    DWORD num_bytes = GetModuleFileNameA(NULL, buffer, length);
 #else
 #error "Expected either Linux or Windows platform!"
 #endif
