@@ -27,7 +27,7 @@ std::string PathNS::get_exe_path()
     ssize_t length = sizeof(buffer);
     ssize_t ret_length = readlink("/proc/self/exe", buffer, length);
     ssize_t num_bytes = std::min(ret_length, length - 1);
-#elif __WIN32
+#elif defined(__WIN32)
     /* Not calling GetModuleFileName(..) since it resolves to GetModuleFIleNameW since UNICODE is defined.
      * that that would include UNICODE filename support which I don't want to deal with. So calling
      * GetModuleFIleNameA(..) directly.
