@@ -9,8 +9,6 @@
  *
  */
 
-#include <cstdio>
-
 #include "headers.hpp"
 
 /**
