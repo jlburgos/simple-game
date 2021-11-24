@@ -18,6 +18,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#if defined(__EMSCRIPTEN_major__)
+#include <emscripten.h>
+#endif
+
 #include "logger.hpp"
 #include "window_manager.hpp"
 

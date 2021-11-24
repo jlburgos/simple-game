@@ -21,7 +21,7 @@ Logger *Logger::logger = nullptr;                 // Initialize singleton pointe
  */
 Logger::Logger()
 {
-    filename = "game";
+    filename = get_file_path();
     rotation = 0;
 }
 
@@ -82,7 +82,7 @@ void Logger::set_filename(const std::string &_filename)
  * 
  * @return std::string 
  */
-std::string Logger::get_filename_raw() const
+std::string Logger::get_filename_raw()
 {
     return this->filename;
 }
@@ -92,7 +92,7 @@ std::string Logger::get_filename_raw() const
  * 
  * @return std::string 
  */
-std::string Logger::get_filename_rotated() const
+std::string Logger::get_filename_rotated()
 {
     std::stringstream ss;
     ss << this->get_filename_raw() << "." << static_cast<int>(this->get_rotation()) << ".log";
@@ -113,7 +113,7 @@ void Logger::rotate_log()
  * 
  * @return unsigned int 
  */
-unsigned int Logger::get_rotation() const
+unsigned int Logger::get_rotation()
 {
     return this->rotation;
 }
@@ -154,13 +154,44 @@ unsigned int Logger::get_file_size()
 }
 
 /**
+ * @brief
+ *
+ * @return std::string
+ */
+std::string Logger::get_file_path()
+{
+    char buffer[256];
+#ifdef __linux__
+    ssize_t length = sizeof(buffer);
+    ssize_t ret_length = readlink("/proc/self/exe", buffer, length);
+    ssize_t num_bytes = std::min(ret_length, length-1);
+#elif __WIN32
+    /* Not calling GetModuleFileName(..) since it resolves to GetModuleFIleNameW since UNICODE is defined.
+     * that that would include UNICODE filename support which I don't want to deal with. So calling
+     * GetModuleFIleNameA(..) directly.
+     */
+    DWORD length = sizeof(buffer);
+    int num_bytes = GetModuleFileNameA(NULL, buffer, length);
+#else
+#error "Expected either Linux or Windows platform!"
+#endif
+    if(num_bytes != -1)
+    {
+        buffer[num_bytes] = '\0';
+    }
+    std::string path(buffer);
+    path.erase(path.rfind(".exe"));
+    return path;
+}
+
+/**
  * @brief 
  * 
  * @param _message 
  */
 void Logger::info(const std::string _message)
 {
-    this->write_message_buffer(_message, this->INFO);
+    this->write_message_buffer(_message, this->PINFO);
 }
 
 /**
@@ -170,7 +201,7 @@ void Logger::info(const std::string _message)
  */
 void Logger::warn(const std::string _message)
 {
-    this->write_message_buffer(_message, this->WARN);
+    this->write_message_buffer(_message, this->PWARN);
 }
 
 /**
@@ -180,7 +211,7 @@ void Logger::warn(const std::string _message)
  */
 void Logger::error(const std::string _message)
 {
-    this->write_message_buffer(_message, this->ERROR);
+    this->write_message_buffer(_message, this->PERROR);
 }
 
 /**
@@ -196,7 +227,6 @@ void Logger::write_message_buffer(const std::string _message, const std::string 
 // Do not write to file if we build as web app
 #if !defined(__EMSCRIPTEN_major__)
 
-    std::cout << this->message_prefix(_flag) << "Writing logs to file..." << std::endl;
     std::ofstream stream;
     stream.open(this->get_filename_rotated(), std::ios::out | std::ios::app);
     stream << this->message_prefix(_flag) << _message << std::endl;
