@@ -22,7 +22,14 @@
 #include <emscripten.h>
 #endif
 
-#include "logger.hpp"
+#if defined(__WIN32)
+#include <windows.h>
+#define sleep(x) Sleep(1000 * (x))
+#endif
+
+#include "util/path.hpp"
+#include "util/timer.hpp"
+#include "util/logger.hpp"
 #include "window_manager.hpp"
 
 #endif /* _HEADERS_HPP */
