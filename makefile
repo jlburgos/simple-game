@@ -118,9 +118,10 @@ WASM_OPTS=\
 ######################################################################################################
 ######################################################################################################
 
-default: tools assets simple-game
+#default: tools assets simple-game
+default: simple-game
 
-wasm: tools assets
+wasm: #tools assets
 	docker run \
 		--rm \
 		--volume $(CWD):/$(ROOT_DIR) \
