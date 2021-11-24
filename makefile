@@ -130,7 +130,7 @@ wasm: #tools assets
 
 .PHONY: simple-game
 simple-game:
-	$(CXX) src/*.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
+	$(CXX) src/*.cpp src/util/*.cpp src/view/*.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
 
 ## Note: Disabling asset compile pipeline experiments for now
 
