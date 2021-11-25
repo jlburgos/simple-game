@@ -22,7 +22,7 @@
  * @brief 
  * 
  */
-namespace Timer
+namespace TimerNS
 {
     /**
      * @brief 

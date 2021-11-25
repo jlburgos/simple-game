@@ -230,5 +230,5 @@ void Logger::write_message_buffer(const std::string _message, const std::string 
 
 std::string Logger::message_prefix(const std::string _flag)
 {
-    return "[" + Timer::current_time() + "] " + _flag + ": ";
+    return "[" + TimerNS::current_time() + "] " + _flag + ": ";
 }
