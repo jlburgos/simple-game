@@ -9,6 +9,10 @@
  *
  */
 
+#include <iostream>
+#include <sstream>
+#include <fstream>
+
 #include "path.hpp"
 #include "logger.hpp"
 #include "timer.hpp"

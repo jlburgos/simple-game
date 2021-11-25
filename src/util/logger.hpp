@@ -12,9 +12,7 @@
 #ifndef _LOGGER_HPP
 #define _LOGGER_HPP
 
-#include <cstdio>
-#include <iostream>
-#include <fstream>
+#include <string>
 
 // TODO :: Add std::mutex if parallel access to file is needed
 
