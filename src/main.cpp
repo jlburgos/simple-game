@@ -11,11 +11,6 @@
 
 #include "headers.hpp"
 
-/**
- * @brief 
- * 
- * @return int 
- */
 int main(void)
 {
     try

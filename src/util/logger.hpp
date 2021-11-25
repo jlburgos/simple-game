@@ -49,9 +49,6 @@ private:
 
     // Constructors and assignment operator are private because this is to be a singleton obj
     Logger();
-    Logger(const std::string &_filename);
-    Logger(const Logger &);
-    Logger &operator=(const Logger &_logger);
 
     void write_message_buffer(const std::string _message, const std::string _flag);
     std::string message_prefix(const std::string _flag);

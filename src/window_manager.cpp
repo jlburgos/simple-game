@@ -25,28 +25,16 @@ SDL_Surface *WindowManager::surface_plant = nullptr;
 SDL_Texture *WindowManager::texture_apple = nullptr;
 SDL_Texture *WindowManager::texture_plant = nullptr;
 
-/**
- * @brief Construct a new Window Manager:: Window Manager object
- * 
- */
 WindowManager::WindowManager()
 {
+    // Nothing to do
 }
 
-/**
- * @brief Destroy the Window Manager:: Window Manager object
- * 
- */
 WindowManager::~WindowManager()
 {
     this->close();
 }
 
-/**
- * @brief 
- * 
- * @return int 
- */
 int WindowManager::init()
 {
     // Initialize SDL
@@ -165,10 +153,6 @@ void WindowManager::start()
     //SDL_Delay(3E3);
 }
 
-/**
- * @brief 
- * 
- */
 void WindowManager::close()
 {
     // Quit SDL subsystems

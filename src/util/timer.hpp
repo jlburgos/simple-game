@@ -14,17 +14,8 @@
 
 #include <string>
 
-/**
- * @brief 
- * 
- */
 namespace TimerNS
 {
-    /**
-     * @brief 
-     * 
-     * @return std::string 
-     */
     std::string current_time();
 }
 
