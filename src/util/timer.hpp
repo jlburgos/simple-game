@@ -12,11 +12,7 @@
 #ifndef __TIMER_HPP
 #define __TIMER_HPP
 
-#include <chrono>
-#include <ctime>
-#include <iomanip>
 #include <string>
-#include <sstream>
 
 /**
  * @brief 
