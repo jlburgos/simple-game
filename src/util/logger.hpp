@@ -20,11 +20,10 @@ class Logger
 {
 public:
     static Logger *get_logger();
-    void info(const std::string);
-    void warn(const std::string);
-    void error(const std::string);
+    void info(const  std::string message, ...);
+    void warn(const  std::string message, ...);
+    void error(const std::string message, ...);
 
-    void set_filename(const std::string &_filename);
     std::string get_filename_raw();
     std::string get_filename_rotated();
     std::string get_file_path();
@@ -32,7 +31,7 @@ public:
 
     void initialize_log();
     void rotate_log();
-    void set_rotation(unsigned int _rotation);
+    void set_rotation(unsigned int);
     unsigned int get_rotation();
     
 private:
@@ -45,14 +44,14 @@ private:
     const std::string PWARN = "WARN";
     const std::string PERROR = "ERROR";
 #if !defined(__EMSCRIPTEN_major__)
-    const unsigned int FILE_SIZE_LIMIT = 1E4; // 10,000 bytes
+    const unsigned int FILE_SIZE_LIMIT = 1E3; // 1,000 bytes
 #endif
 
     // Constructors and assignment operator are private because this is to be a singleton obj
     Logger();
 
-    void write_message_buffer(const std::string _message, const std::string _flag);
-    std::string message_prefix(const std::string _flag);
+    void write_message_buffer(const std::string message, const std::string flag);
+    std::string message_prefix(const std::string flag);
 }; 
 
 // Define global logger

@@ -10,8 +10,10 @@
  */
 
 #include <iostream>
+#include <cstdio>
 #include <sstream>
 #include <fstream>
+#include <cstdarg>
 
 #include "path.hpp"
 #include "logger.hpp"
@@ -34,11 +36,6 @@ Logger *Logger::get_logger()
         logger = new Logger();
     }
     return logger;
-}
-
-void Logger::set_filename(const std::string &_filename)
-{
-    this->filename = _filename;
 }
 
 std::string Logger::get_filename_raw()
@@ -98,27 +95,42 @@ unsigned int Logger::get_file_size()
 
 std::string Logger::get_file_path()
 {
-    return PathNS::get_exe_path_no_ext(); // Using game binary (minus extension) as base for log file name
+    return PathNS::get_bin_logs_path() + "/" + PathNS::get_exe_name_no_path();
 }
 
-void Logger::info(const std::string _message)
+void Logger::info(const std::string message, ...)
 {
-    this->write_message_buffer(_message, this->PINFO);
+    char buffer[256];
+    va_list args;
+    va_start(args, message);
+    vsprintf(buffer, message.c_str(), args);
+    va_end(args);
+    this->write_message_buffer(std::string(buffer), this->PINFO);
 }
 
-void Logger::warn(const std::string _message)
+void Logger::warn(const std::string message, ...)
 {
-    this->write_message_buffer(_message, this->PWARN);
+    char buffer[256];
+    va_list args;
+    va_start(args, message);
+    vsprintf(buffer, message.c_str(), args);
+    va_end(args);
+    this->write_message_buffer(std::string(buffer), this->PWARN);
 }
 
-void Logger::error(const std::string _message)
+void Logger::error(const std::string message, ...)
 {
-    this->write_message_buffer(_message, this->PERROR);
+    char buffer[256];
+    va_list args;
+    va_start(args, message);
+    vsprintf(buffer, message.c_str(), args);
+    va_end(args);
+    this->write_message_buffer(std::string(buffer), this->PERROR);
 }
 
-void Logger::write_message_buffer(const std::string _message, const std::string _flag)
+void Logger::write_message_buffer(const std::string message, const std::string flag)
 {
-    std::cout << this->message_prefix(_flag) << _message << std::endl;
+    std::cout << this->message_prefix(flag) << message << std::endl;
 
 // Do not write to file if we build as web app
 #if !defined(__EMSCRIPTEN_major__)
@@ -128,13 +140,13 @@ void Logger::write_message_buffer(const std::string _message, const std::string 
     }
     std::ofstream ofs;
     ofs.open(this->get_filename_rotated(), std::ofstream::out | std::ofstream::app);
-    ofs << this->message_prefix(_flag) << _message << std::endl;
+    ofs << this->message_prefix(flag) << message << std::endl;
     ofs.flush();
     ofs.close();
 #endif
 }
 
-std::string Logger::message_prefix(const std::string _flag)
+std::string Logger::message_prefix(const std::string flag)
 {
-    return "[" + TimerNS::current_time() + "] " + _flag + ": ";
+    return "[" + TimerNS::current_time() + "] " + flag + ": ";
 }
