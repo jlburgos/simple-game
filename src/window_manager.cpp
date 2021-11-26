@@ -10,8 +10,10 @@
  */
 
 #include <cstdio>
+#include <sstream>
 
 #include "window_manager.hpp"
+#include "util/path.hpp"
 #include "util/logger.hpp"
 
 // Define static members
@@ -78,16 +80,23 @@ int WindowManager::init()
 
     //rw_apple = SDL_RWFromConstMem(APPLE_PNG, static_cast<int>(APPLE_PNG_LEN));
     //surface_apple = IMG_LoadPNG_RW(rw_apple);
-    surface_apple = IMG_Load("./assets/test-imgs/apple.png");
+
+    std::stringstream path;
+    path << PathNS::get_assets_path() << "/test-imgs/apple.png";
+    surface_apple = IMG_Load(path.str().c_str());
     if(surface_apple == nullptr)
     {
         LOG.error("Failed to create apple surface!");
         LOG.error(SDL_GetError());
         SDL_ClearError();
     }
+    path.str(std::string());
+    path.clear();
+
     //rw_plant = SDL_RWFromConstMem(PLANT_JPEG, static_cast<int>(PLANT_JPEG_LEN));
     //surface_plant = IMG_LoadJPG_RW(rw_plant);
-    surface_plant = IMG_Load("./assets/test-imgs/plant.jpeg");
+    path << PathNS::get_assets_path() << "/test-imgs/plant.jpeg";
+    surface_plant = IMG_Load(path.str().c_str());
     if(surface_plant == nullptr)
     {
         LOG.error("Failed to create plant surface!");
@@ -128,29 +137,28 @@ void WindowManager::start()
                 break;
             }
         }
+        LOG.info("Before rendering anything, wait a bit...");
+        SDL_Delay(1E3);
+        SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
+        LOG.info("Let us initialize renderer color...");
+        SDL_Delay(1E3);
+
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture_plant, NULL, NULL);
         SDL_RenderPresent(renderer);
 
+        LOG.info("Render plant");
         SDL_Delay(1E3);
 
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture_apple, NULL, NULL);
         SDL_RenderPresent(renderer);
 
+        LOG.info("Render apple");
         SDL_Delay(1E3);
 
         break; // Avoid infinite loop for now
     }
-
-    SDL_DestroyTexture(texture_apple);
-    SDL_DestroyTexture(texture_plant);
-
-    // Update the surface
-    //SDL_UpdateWindowSurface(this->window);
-
-    // Wait for a bit
-    //SDL_Delay(3E3);
 }
 
 void WindowManager::close()
