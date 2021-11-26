@@ -22,7 +22,9 @@
 #include <emscripten.h>
 #endif
 
-#if defined(__WIN32)
+#if __linux__
+#include <unistd.h>
+#elif defined(__WIN32)
 #include <windows.h>
 #define sleep(x) Sleep(1000 * (x))
 #endif
