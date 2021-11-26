@@ -27,6 +27,10 @@ std::string PathNS::get_exe_path()
     ssize_t length = sizeof(buffer);
     ssize_t ret_length = readlink("/proc/self/exe", buffer, length);
     ssize_t num_bytes = std::min(ret_length, length - 1);
+    if (num_bytes == -1)
+    {
+        throw PathException("Failed in readlink call!");
+    }
 #elif defined(__WIN32)
     /* Not calling GetModuleFileName(..) since it resolves to GetModuleFIleNameW since UNICODE is defined.
      * that that would include UNICODE filename support which I don't want to deal with. So calling
@@ -34,13 +38,13 @@ std::string PathNS::get_exe_path()
      */
     DWORD length = sizeof(buffer);
     DWORD num_bytes = GetModuleFileNameA(NULL, buffer, length);
-#else
-#error "Expected either Linux or Windows platform!"
-#endif
     if (num_bytes == 0)
     {
         throw PathException("Failed in GetModuleFileNameA call!");
     }
+#else
+#error "Expected either Linux or Windows platform!"
+#endif
     buffer[num_bytes] = '\0'; // Need this otherwise we're going to have a bad time
     std::string path(buffer);
     for(std::size_t i = 0; i < path.length(); ++i)
@@ -52,7 +56,6 @@ std::string PathNS::get_exe_path()
 
 std::string PathNS::get_exe_path_no_ext()
 {
-    std::cout << "PathNS::get_exe_path_no_ext()" << std::endl;
     std::string exe_path = PathNS::get_exe_path();
     std::size_t pos = exe_path.rfind(".exe");
     if(pos != std::string::npos)
