@@ -20,8 +20,8 @@ class Logger
 {
 public:
     static Logger *get_logger();
-    void info(const  std::string message, ...);
-    void warn(const  std::string message, ...);
+    void info(const std::string message, ...);
+    void warn(const std::string message, ...);
     void error(const std::string message, ...);
 
     std::string get_filename_raw();
