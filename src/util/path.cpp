@@ -56,21 +56,23 @@ std::string PathNS::get_exe_path()
 
 std::string PathNS::get_exe_path_no_ext()
 {
-    std::string exe_path = PathNS::get_exe_path();
-    std::size_t pos = exe_path.rfind(".exe");
+    std::string path = PathNS::get_exe_path();
+    std::size_t pos = path.rfind(".exe");
     if(pos != std::string::npos)
     {
-        exe_path.erase(exe_path.rfind(".exe"));
+        path.erase(path.rfind(".exe"));
     }
-    return exe_path;
+    return path;
 }
 
 std::string PathNS::get_exe_name_no_path()
 {
-    std::string exe_path_no_ext = PathNS::get_exe_path_no_ext();
-    std::size_t pos = exe_path_no_ext.rfind("/");
-
-    std::string path = exe_path_no_ext.substr(pos+1);
+    std::string path = PathNS::get_exe_path_no_ext();
+    std::size_t pos = path.rfind("/");
+    if(pos != std::string::npos)
+    {
+        path = path.substr(pos + 1);
+    }
 
     return path;
 }
