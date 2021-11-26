@@ -22,8 +22,9 @@ Logger *Logger::logger = nullptr;                 // Initialize singleton pointe
 
 Logger::Logger()
 {
-    filename = get_file_path();
-    rotation = 0;
+    this->filename = get_file_path();
+    this->rotation = 0;
+    this->initialize_log();
 }
 
 Logger *Logger::get_logger()
@@ -52,9 +53,17 @@ std::string Logger::get_filename_rotated()
     return ss.str();
 }
 
+void Logger::initialize_log()
+{
+    std::ofstream ofs;
+    ofs.open(this->get_filename_rotated(), std::ofstream::out | std::ofstream::app);
+    ofs.close();
+}
+
 void Logger::rotate_log()
 {
     this->set_rotation(this->rotation + 1);
+    this->initialize_log();
 }
 
 unsigned int Logger::get_rotation()
@@ -113,25 +122,15 @@ void Logger::write_message_buffer(const std::string _message, const std::string 
 
 // Do not write to file if we build as web app
 #if !defined(__EMSCRIPTEN_major__)
-
-    std::ofstream stream;
-    stream.open(this->get_filename_rotated(), std::ios::out | std::ios::app);
-    stream << this->message_prefix(_flag) << _message << std::endl;
-    stream.flush();
-    stream.close();
-
-    if(this->get_file_size() > this->FILE_SIZE_LIMIT)
+    while(this->get_file_size() > this->FILE_SIZE_LIMIT)
     {
-        std::stringstream ss;
-        ss << this->message_prefix(_flag) << ": Rotated log to rotation " << this->get_filename_rotated();
-        std::cout << ss.str() << std::endl;
-
         this->rotate_log();
-        stream.open(this->get_filename_rotated(), std::ios::out | std::ios::app);
-        stream << ss.str() << std::endl;
-        stream.flush();
-        stream.close();
     }
+    std::ofstream ofs;
+    ofs.open(this->get_filename_rotated(), std::ofstream::out | std::ofstream::app);
+    ofs << this->message_prefix(_flag) << _message << std::endl;
+    ofs.flush();
+    ofs.close();
 #endif
 }
 

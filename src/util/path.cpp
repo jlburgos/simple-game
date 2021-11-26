@@ -9,15 +9,15 @@
  * 
  */
 
-#include "path.hpp"
-
 #ifdef __linux__
 #include <unistd.h>
 #elif defined(__WIN32)
 #include <windows.h>
 #endif
-
+#include <iostream>
 #include <stdexcept>
+
+#include "path.hpp"
 
 std::string PathNS::get_exe_path()
 {
@@ -41,24 +41,66 @@ std::string PathNS::get_exe_path()
     {
         throw PathException("Failed in GetModuleFileNameA call!");
     }
-    return std::string(buffer);
+    buffer[num_bytes] = '\0'; // Need this otherwise we're going to have a bad time
+    std::string path(buffer);
+    for(std::size_t i = 0; i < path.length(); ++i)
+    {
+        path[i] == '\\' ? path[i] = '/' : path[i];
+    }
+    return path;
 }
 
 std::string PathNS::get_exe_path_no_ext()
 {
+    std::cout << "PathNS::get_exe_path_no_ext()" << std::endl;
     std::string exe_path = PathNS::get_exe_path();
-    return exe_path.erase(exe_path.rfind(".exe"));
+    std::size_t pos = exe_path.rfind(".exe");
+    if(pos != std::string::npos)
+    {
+        exe_path.erase(exe_path.rfind(".exe"));
+    }
+    return exe_path;
+}
+
+std::string PathNS::get_exe_name_no_path()
+{
+    std::string exe_path_no_ext = PathNS::get_exe_path_no_ext();
+    std::size_t pos = exe_path_no_ext.rfind("/");
+
+    std::string path = exe_path_no_ext.substr(pos+1);
+
+    return path;
 }
 
 std::string PathNS::get_root_path()
 {
-    std::string exe_path = PathNS::get_exe_path();
-    return exe_path.erase(exe_path.rfind("/"));
+    std::string path = PathNS::get_exe_path();
+    std::size_t pos = path.rfind("/");
+
+    // Remove executable name from path
+    if(pos != std::string::npos)
+    {
+        path.erase(pos);
+    }
+
+    // Remove "bin" directory name from path
+    pos = path.rfind("/");
+    if(pos != std::string::npos)
+    {
+        path.erase(pos);
+    }
+
+    return path;
 }
 
 std::string PathNS::get_bin_path()
 {
     return PathNS::get_root_path() + "/bin";
+}
+
+std::string PathNS::get_bin_logs_path()
+{
+    return PathNS::get_root_path() + "/bin/logs";
 }
 
 std::string PathNS::get_assets_path()

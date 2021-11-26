@@ -30,6 +30,7 @@ public:
     std::string get_file_path();
     unsigned int get_file_size();
 
+    void initialize_log();
     void rotate_log();
     void set_rotation(unsigned int _rotation);
     unsigned int get_rotation();

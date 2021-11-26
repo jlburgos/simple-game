@@ -2,10 +2,7 @@
 #.gitignore
 
 # Ignore binaries
-bin/simple-game*
+bin/*
 !bin/*dll
 !bin/README.md
-
-# Ignore tools
-tools/**/bin/*
-!tools/**/bin/README.md
+!bin/logs/README.md
