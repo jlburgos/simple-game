@@ -14,6 +14,7 @@
 #include <sstream>
 #include <fstream>
 #include <cstdarg>
+#include <thread>
 
 #include "path.hpp"
 #include "logger.hpp"
@@ -134,10 +135,13 @@ void Logger::write_message_buffer(const std::string message, const std::string f
 
 // Do not write to file if we build as web app
 #if !defined(__EMSCRIPTEN_major__)
+    const std::lock_guard<std::mutex> lock(this->logger_mutex);
     while(this->get_file_size() > this->FILE_SIZE_LIMIT)
     {
         this->rotate_log();
     }
+
+
     std::ofstream ofs;
     ofs.open(this->get_filename_rotated(), std::ofstream::out | std::ofstream::app);
     ofs << this->message_prefix(flag) << message << std::endl;
@@ -148,5 +152,7 @@ void Logger::write_message_buffer(const std::string message, const std::string f
 
 std::string Logger::message_prefix(const std::string flag)
 {
-    return "[" + TimerNS::current_time() + "] " + flag + ": ";
+    std::stringstream ss;
+    ss << "[" << TimerNS::current_time() << "][THREAD " << std::this_thread::get_id() << "] " << flag << ": ";
+    return ss.str();
 }

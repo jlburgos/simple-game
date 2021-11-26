@@ -13,8 +13,7 @@
 #define _LOGGER_HPP
 
 #include <string>
-
-// TODO :: Add std::mutex if parallel access to file is needed
+#include <mutex>
 
 class Logger
 {
@@ -25,6 +24,9 @@ public:
     void error(const std::string message, ...);
 
 private:
+    // Constructors and assignment operator are private because this is to be a singleton obj
+    Logger();
+
     std::string get_filename_raw();
     std::string get_filename_rotated();
     std::string get_file_path();
@@ -40,18 +42,17 @@ private:
     std::string filename;
     unsigned int rotation;
 
+    void write_message_buffer(const std::string message, const std::string flag);
+    std::string message_prefix(const std::string flag);
+
     const std::string PINFO = "INFO";
     const std::string PWARN = "WARN";
     const std::string PERROR = "ERROR";
+
 #if !defined(__EMSCRIPTEN_major__)
     const unsigned int FILE_SIZE_LIMIT = 1E3; // 1,000 bytes
+    std::mutex logger_mutex;
 #endif
-
-    // Constructors and assignment operator are private because this is to be a singleton obj
-    Logger();
-
-    void write_message_buffer(const std::string message, const std::string flag);
-    std::string message_prefix(const std::string flag);
 }; 
 
 // Define global logger
