@@ -29,13 +29,15 @@ int main(void)
         }
         LOG.info("Initialization completed! Bringing up window now...");
         mgr.start();
+        mgr.close();
 
-        LOG.info("Program completed");
-        return 0;
+        LOG.info("Program completed! Exiting in a couple seconds...");
+        sleep(2);
+        return EXIT_SUCCESS;
     }
     catch (const PathNS::PathException &ex)
     {
         std::cout << "Exception: " << ex.what() << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 }
