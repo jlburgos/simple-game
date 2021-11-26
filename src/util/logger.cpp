@@ -140,8 +140,6 @@ void Logger::write_message_buffer(const std::string message, const std::string f
     {
         this->rotate_log();
     }
-
-
     std::ofstream ofs;
     ofs.open(this->get_filename_rotated(), std::ofstream::out | std::ofstream::app);
     ofs << this->message_prefix(flag) << message << std::endl;
