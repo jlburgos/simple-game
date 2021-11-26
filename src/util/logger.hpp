@@ -24,6 +24,7 @@ public:
     void warn(const std::string message, ...);
     void error(const std::string message, ...);
 
+private:
     std::string get_filename_raw();
     std::string get_filename_rotated();
     std::string get_file_path();
@@ -34,7 +35,6 @@ public:
     void set_rotation(unsigned int);
     unsigned int get_rotation();
     
-private:
     static Logger *logger;
 
     std::string filename;
