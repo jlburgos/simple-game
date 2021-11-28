@@ -81,22 +81,19 @@ int WindowManager::init()
     //rw_apple = SDL_RWFromConstMem(APPLE_PNG, static_cast<int>(APPLE_PNG_LEN));
     //surface_apple = IMG_LoadPNG_RW(rw_apple);
 
-    std::stringstream path;
-    path << PathNS::get_assets_path() << "/test-imgs/apple.png";
-    surface_apple = IMG_Load(path.str().c_str());
+    std::string path = PathNS::get_assets_path() + "/test-imgs/apple.png";
+    surface_apple = IMG_Load(path.c_str());
     if(surface_apple == nullptr)
     {
         LOG.error("Failed to create apple surface!");
         LOG.error(SDL_GetError());
         SDL_ClearError();
     }
-    path.str(std::string());
-    path.clear();
 
     //rw_plant = SDL_RWFromConstMem(PLANT_JPEG, static_cast<int>(PLANT_JPEG_LEN));
     //surface_plant = IMG_LoadJPG_RW(rw_plant);
-    path << PathNS::get_assets_path() << "/test-imgs/plant.jpeg";
-    surface_plant = IMG_Load(path.str().c_str());
+    path = PathNS::get_assets_path() + "/test-imgs/plant.jpeg";
+    surface_plant = IMG_Load(path.c_str());
     if(surface_plant == nullptr)
     {
         LOG.error("Failed to create plant surface!");
