@@ -38,7 +38,7 @@ std::string PathNS::get_exe_path()
      */
     DWORD length = sizeof(buffer);
     DWORD num_bytes = GetModuleFileNameA(NULL, buffer, length);
-    if (num_bytes == 0)
+    if (num_bytes == static_cast<DWORD>(0))
     {
         throw PathException("Failed in GetModuleFileNameA call!");
     }
