@@ -25,9 +25,16 @@ Logger *Logger::logger = nullptr;                 // Initialize singleton pointe
 
 Logger::Logger()
 {
+    this->logger_healthy = false;
     this->filename = get_file_path();
     this->rotation = 0;
     this->initialize_log();
+    this->logger_healthy = true;
+}
+
+bool Logger::is_logger_healthy()
+{
+    return this->logger_healthy;
 }
 
 Logger *Logger::get_logger()

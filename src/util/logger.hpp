@@ -22,10 +22,22 @@ public:
     void info(const std::string message, ...);
     void warn(const std::string message, ...);
     void error(const std::string message, ...);
+    bool is_logger_healthy();
+
+    class LoggerException : public std::runtime_error
+    {
+    public:
+        LoggerException(const char *msg) : std::runtime_error(msg)
+        {
+            // Nothing to do
+        }
+    };
 
 private:
     // Constructors and assignment operator are private because this is to be a singleton obj
     Logger();
+
+    bool logger_healthy;
 
     std::string get_filename_raw();
     std::string get_filename_rotated();
