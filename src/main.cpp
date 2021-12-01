@@ -37,7 +37,38 @@ int main(void)
     }
     catch (const PathNS::PathException &ex)
     {
-        std::cout << "Exception: " << ex.what() << std::endl;
+        std::cerr << "Path Exception: " << ex.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    catch (const Logger::LoggerException &ex)
+    {
+        std::cerr << "Logger Exception: " << ex.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    catch (const std::exception &ex)
+    {
+        std::string msg = "Exception: " + std::string(ex.what());
+        if(Logger::get_logger() != nullptr && LOG.is_logger_healthy())
+        {
+            LOG.error(msg);
+        }
+        else
+        {
+            std::cerr << msg << std::endl;
+        }
+        return EXIT_FAILURE;
+    }
+    catch (...)
+    {
+        std::string msg = "Exception: Unknown exception occurred!";
+        if(Logger::get_logger() != nullptr && LOG.is_logger_healthy())
+        {
+            LOG.error(msg);
+        }
+        else
+        {
+            std::cerr << msg << std::endl;
+        }
         return EXIT_FAILURE;
     }
 }
