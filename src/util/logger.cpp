@@ -33,7 +33,7 @@ void manage_message_queue()
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        if(LOG.is_stay_alive() || !LOG.q1.empty() || !LOG.q2.empty())
+        if(LOG.stay_alive || !LOG.q1.empty() || !LOG.q2.empty())
         {
             if(LOG.active_q == &LOG.q1)
             {
@@ -70,9 +70,11 @@ Logger::Logger()
     this->logger_healthy = true;
     this->initialize_log();
 #if !defined(__EMSCRIPTEN_major__) // Do not write to file if we build as web app
+    this->active_q = &this->q1;
     this->stay_alive = true;
     this->initialize_worker_thread();
 #else
+    this->active_q = nullptr;
     this->thread = nullptr;
     this->stay_alive = false;
 #endif

@@ -69,8 +69,8 @@ private:
 
     Message create_message(Flag flag, std::string str);
     std::string fmt_message(const Logger::Message &msg);
-    std::queue<Message> q1,q2;
-    std::queue<Message> *active_q = &q1; // Initialize to this default
+    std::queue<Message> q1, q2;
+    std::queue<Message> *active_q;
     void initialize_worker_thread();
 
     std::string get_filename_raw();
