@@ -166,7 +166,7 @@ void Logger::info(const std::string message, ...)
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
-    Message msg = {time, this->PINFO, std::this_thread::get_id(), std::string(buffer)};
+    Message msg = Message(time, this->PINFO, std::this_thread::get_id(), std::string(buffer));
     std::cout << this->fmt_message(msg) << std::endl;
     if(this->stay_alive)
     {
@@ -183,7 +183,7 @@ void Logger::warn(const std::string message, ...)
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
-    Message msg = {time, this->PWARN, std::this_thread::get_id(), std::string(buffer)};
+    Message msg = Message(time, this->PWARN, std::this_thread::get_id(), std::string(buffer));
     std::cout << this->fmt_message(msg) << std::endl;
     if(this->stay_alive)
     {
@@ -200,7 +200,7 @@ void Logger::error(const std::string message, ...)
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
-    Message msg = {time, this->PERROR, std::this_thread::get_id(), std::string(buffer)};
+    Message msg = Message(time, this->PERROR, std::this_thread::get_id(), std::string(buffer));
     std::cout << this->fmt_message(msg) << std::endl;
     if(this->stay_alive)
     {
