@@ -151,14 +151,14 @@ void Logger::set_rotation(unsigned int rot)
 
 std::size_t Logger::get_file_size()
 {
-    std::ifstream is;
-    is.open(this->get_filename_rotated(), std::ifstream::binary);
+    std::ifstream ifs;
+    ifs.open(this->get_filename_rotated(), std::ifstream::binary);
     std::size_t file_size = 0;
-    if(is)
+    if(ifs)
     {
-        is.seekg(0, is.end);
-        file_size = static_cast<unsigned int>(is.tellg());
-        is.close();
+        ifs.seekg(0, ifs.end);
+        file_size = static_cast<unsigned int>(ifs.tellg());
+        ifs.close();
     }
     else
     {
