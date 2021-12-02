@@ -160,7 +160,7 @@ std::string Logger::get_file_path()
     return PathNS::get_bin_logs_path() + "/" + PathNS::get_exe_name_no_path();
 }
 
-void Logger::info(std::string message, ...)
+void Logger::info(const std::string message, ...)
 {
     std::string time = TimerNS::current_time();
     char buffer[256];
