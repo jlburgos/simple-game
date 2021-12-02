@@ -33,7 +33,6 @@ void manage_message_queue()
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        // Create a scope for the lock to protect queue assignment
         if(LOG.is_stay_alive() || !LOG.q1.empty() || !LOG.q2.empty())
         {
             if(LOG.active_q == &LOG.q1)
