@@ -52,9 +52,12 @@ private:
     class Message
     {
     public:
-        Message(std::string t, std::string f, std::string m) : timestamp(t), flag(f), msg(m) {}
+        Message(std::string t, std::string f, std::thread::id id, std::string m) : timestamp(t), flag(f), threadid(id), msg(m) {}
         ~Message() {}
-        std::string timestamp, flag, msg;
+        std::string timestamp;
+        std::string flag;
+        std::thread::id threadid;
+        std::string msg;
     };
     std::string fmt_message(const Logger::Message &msg);
     std::queue<Message> q1,q2;
