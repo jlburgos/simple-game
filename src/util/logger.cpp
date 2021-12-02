@@ -132,7 +132,11 @@ std::string Logger::get_filename_rotated()
 
 void Logger::initialize_log()
 {
-    this->write_message_buffer("Initializing new log ...");
+    std::ofstream ofs;
+    ofs.open(this->get_filename_rotated(), std::ofstream::out | std::ofstream::app);
+    Message msg = create_message(PINFO, "Initializing new log...");
+    ofs << fmt_message(msg);
+    ofs.close();
 }
 
 void Logger::rotate_log()
