@@ -64,7 +64,6 @@ private:
     std::string get_filename_raw();
     std::string get_filename_rotated();
     std::string get_file_path();
-    std::size_t get_file_size();
 
     void initialize_log();
     void rotate_log();
@@ -83,7 +82,7 @@ private:
     const std::string PERROR = "ERROR";
 
 #if !defined(__EMSCRIPTEN_major__)
-    const unsigned int FILE_SIZE_LIMIT = 1E3; // 1,000 bytes
+    const std::size_t FILE_SIZE_LIMIT = 1E3; // 1,000 bytes
     std::mutex logger_mutex;
 #endif
 }; 

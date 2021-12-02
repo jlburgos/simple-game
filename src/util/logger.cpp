@@ -16,6 +16,7 @@
 #include <cstdarg>
 #include <thread>
 #include <chrono>
+#include <filesystem>
 
 #include "path.hpp"
 #include "logger.hpp"
@@ -149,25 +150,6 @@ void Logger::set_rotation(unsigned int rot)
     this->rotation = rot;
 }
 
-std::size_t Logger::get_file_size()
-{
-    std::ifstream ifs;
-    ifs.open(this->get_filename_rotated(), std::ifstream::ate | std::ifstream::binary);
-    std::size_t file_size = 0;
-    if(ifs)
-    {
-        file_size = static_cast<std::size_t>(ifs.tellg());
-        ifs.close();
-    }
-    else
-    {
-        std::stringstream ss;
-        ss << "Failed to read file \"" << this->get_filename_rotated() << "\" to determine file size. Returning size value of \"0\".";
-        this->error(ss.str());
-    }
-    return file_size;
-}
-
 std::string Logger::get_file_path()
 {
     return PathNS::get_bin_logs_path() + "/" + PathNS::get_exe_name_no_path();
@@ -235,7 +217,7 @@ void Logger::error(const std::string message, ...)
 
 void Logger::write_message_buffer(const std::string message)
 {
-    while(this->get_file_size() > this->FILE_SIZE_LIMIT)
+    while(std::filesystem::file_size(this->get_filename_rotated()) > this->FILE_SIZE_LIMIT)
     {
         this->rotate_log();
     }
