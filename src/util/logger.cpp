@@ -243,7 +243,6 @@ void Logger::write_message_buffer(const std::string message)
     std::ofstream ofs;
     ofs.open(this->get_filename_rotated(), std::ofstream::out | std::ofstream::app);
     ofs << message << std::endl;
-    ofs.flush();
     ofs.close();
 }
 
