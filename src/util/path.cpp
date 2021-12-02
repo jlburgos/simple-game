@@ -21,8 +21,7 @@
 
 std::string PathNS::get_exe_path()
 {
-    const int max_size = 256;
-    char buffer[max_size];
+    char buffer[MAX_PATH];
 #ifdef __linux__
     ssize_t length = sizeof(buffer);
     ssize_t ret_length = readlink("/proc/self/exe", buffer, length);
