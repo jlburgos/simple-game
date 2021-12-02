@@ -14,30 +14,66 @@
 
 int main(void)
 {
+    int rc = EXIT_FAILURE;
     try
     {
+        std::cout << "Calling logger" << std::endl;
         LOG.info("Starting program...");
         SDL_SetMainReady();
         WindowManager mgr;
 
         LOG.info("Initializing window manager...");
-        int rc = mgr.init();
+        rc = mgr.init();
         if (rc != 0)
         {
             LOG.error("Failed to initialize program!\n");
-            return rc;
         }
-        LOG.info("Initialization completed! Bringing up window now...");
-        mgr.start();
-        mgr.close();
+        else
+        {
+            LOG.info("Initialization completed! Bringing up window now...");
+            mgr.start();
+            mgr.close();
 
-        LOG.info("Program completed with status '%d'! Exiting in a couple seconds...", EXIT_SUCCESS);
-        sleep(2);
-        return EXIT_SUCCESS;
+            LOG.info("Program completed with status '%d'! Exiting in a couple seconds...", EXIT_SUCCESS);
+            sleep(2);
+            rc = EXIT_SUCCESS;
+        }
     }
     catch (const PathNS::PathException &ex)
     {
-        std::cout << "Exception: " << ex.what() << std::endl;
-        return EXIT_FAILURE;
+        std::cerr << "Path Exception: " << ex.what() << std::endl;
     }
+    catch (const Logger::LoggerException &ex)
+    {
+        std::cerr << "Logger Exception: " << ex.what() << std::endl;
+    }
+    catch (const std::exception &ex)
+    {
+        std::string msg = "Exception: " + std::string(ex.what());
+        if(Logger::get_logger() != nullptr && LOG.is_logger_healthy())
+        {
+            LOG.error(msg);
+        }
+        else
+        {
+            std::cerr << msg << std::endl;
+        }
+    }
+    catch (...)
+    {
+        std::string msg = "Exception: Unknown exception occurred!";
+        if(Logger::get_logger() != nullptr && LOG.is_logger_healthy())
+        {
+            LOG.error(msg);
+        }
+        else
+        {
+            std::cerr << msg << std::endl;
+        }
+    }
+    if (Logger::get_logger() != nullptr && LOG.is_logger_healthy())
+    {
+        LOG.close_logger_thread();
+    }
+    return rc;
 }

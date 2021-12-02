@@ -45,12 +45,8 @@ SDL_FLAGS=\
 	-l SDL2 \
 	-l SDL2_image \
 	-l SDL2_ttf \
-	-I external-dep/SDL2/inc
-ifeq ($(OS), Windows_NT)
-SDL_FLAGS+=\
+	-I external-dep/SDL2/inc \
 	-L external-dep/SDL2/lib
-endif
-
 
 WASM_SDL_FLAGS=\
 	-s USE_SDL=2 \
@@ -63,7 +59,6 @@ WASM_SDL_FLAGS=\
 	--closure 1 \
 	--minify 0 \
 	--bind
-
 
 ## Note: Add the '-mwindows' option to remove the terminal pop-up when double-clicking the game.exe file
 ##       https://gcc.gnu.org/onlinedocs/gcc/x86-Windows-Options.html
