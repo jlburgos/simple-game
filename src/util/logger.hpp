@@ -90,7 +90,7 @@ private:
     void write_message_buffer(const std::string message);
 
 #if !defined(__EMSCRIPTEN_major__)
-    const std::size_t FILE_SIZE_LIMIT = 1E3; // 1,000 bytes
+    const std::size_t FILE_SIZE_LIMIT = 1E4; // 10,000 bytes
     std::mutex logger_mutex;
 #endif
 }; 
