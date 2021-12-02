@@ -29,11 +29,12 @@ void manage_message_queue()
 {
     std::queue<Logger::Message> *frozen_q = nullptr;
     std::cout << "Beginning message queue log worker..." << std::endl;
-    while(LOG.is_stay_alive())
+    while(true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         // Create a scope for the lock to protect queue assignment
+        if(LOG.is_stay_alive())
         {
             const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
             if(LOG.active_q == &LOG.q1)
@@ -46,6 +47,10 @@ void manage_message_queue()
                 LOG.active_q = &LOG.q1;
                 frozen_q = &LOG.q2;
             }
+        }
+        else
+        {
+            break;
         }
 
         while(!frozen_q->empty())
