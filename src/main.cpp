@@ -17,7 +17,6 @@ int main(void)
     int rc = EXIT_FAILURE;
     try
     {
-        std::cout << "Calling logger" << std::endl;
         LOG.info("Starting program...");
         SDL_SetMainReady();
         WindowManager mgr;
