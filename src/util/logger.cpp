@@ -36,14 +36,15 @@ void manage_message_queue()
         // Create a scope for the lock to protect queue assignment
         if(LOG.is_stay_alive() || !LOG.q1.empty() || !LOG.q2.empty())
         {
-            const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
             if(LOG.active_q == &LOG.q1)
             {
+                const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
                 LOG.active_q = &LOG.q2;
                 frozen_q = &LOG.q1;
             }
             else
             {
+                const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
                 LOG.active_q = &LOG.q1;
                 frozen_q = &LOG.q2;
             }
