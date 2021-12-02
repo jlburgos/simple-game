@@ -55,9 +55,7 @@ void manage_message_queue()
 
         while(!frozen_q->empty())
         {
-            std::string msg = LOG.fmt_message(frozen_q->front());
-            std::cout << msg << std::endl;
-            LOG.write_message_buffer(msg);
+            LOG.write_message_buffer(LOG.fmt_message(frozen_q->front()));
             frozen_q->pop();
         }
     }
@@ -169,14 +167,11 @@ void Logger::info(const std::string message, ...)
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
     Message msg = {time, this->PINFO, std::string(buffer)};
+    std::cout << this->fmt_message(msg) << std::endl;
     if(this->stay_alive)
     {
         const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
         active_q->push(msg);
-    }
-    else
-    {
-        std::cout << this->fmt_message(msg) << std::endl;
     }
 }
 
@@ -189,14 +184,11 @@ void Logger::warn(const std::string message, ...)
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
     Message msg = {time, this->PWARN, std::string(buffer)};
+    std::cout << this->fmt_message(msg) << std::endl;
     if(this->stay_alive)
     {
         const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
         active_q->push(msg);
-    }
-    else
-    {
-        std::cout << this->fmt_message(msg) << std::endl;
     }
 }
 
@@ -209,14 +201,11 @@ void Logger::error(const std::string message, ...)
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
     Message msg = {time, this->PERROR, std::string(buffer)};
+    std::cout << this->fmt_message(msg) << std::endl;
     if(this->stay_alive)
     {
         const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
         this->active_q->push(msg);
-    }
-    else
-    {
-        std::cout << this->fmt_message(msg) << std::endl;
     }
 }
 
