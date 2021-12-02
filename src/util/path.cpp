@@ -11,6 +11,7 @@
 
 #ifdef __linux__
 #include <unistd.h>
+#define MAX_PATH 256
 #elif defined(__WIN32)
 #include <windows.h>
 #endif
