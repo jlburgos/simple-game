@@ -230,6 +230,6 @@ void Logger::write_message_buffer(const std::string message)
 std::string Logger::fmt_message(const Logger::Message &msg)
 {
     std::stringstream ss;
-    ss << "> [" << msg.timestamp << "][THREAD " << std::this_thread::get_id() << "] " << msg.flag << ": " << msg.msg;
+    ss << "[" << msg.timestamp << "][THREAD " << std::this_thread::get_id() << "] " << msg.flag << ": " << msg.msg;
     return ss.str();
 }
