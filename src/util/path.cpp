@@ -23,10 +23,8 @@ std::string PathNS::get_exe_path()
 {
     char buffer[MAX_PATH];
 #ifdef __linux__
-    ssize_t length = sizeof(buffer);
-    ssize_t ret_length = readlink("/proc/self/exe", buffer, length);
-    ssize_t num_bytes = std::min(ret_length, length - 1);
-    if (num_bytes == -1)
+    ssize_t num_bytes = readlink("/proc/self/exe", buffer, MAX_PATH);
+    if (num_bytes < 0 || num_bytes >= MAX_PATH)
     {
         throw PathException("Failed in readlink call!");
     }
@@ -35,9 +33,8 @@ std::string PathNS::get_exe_path()
      * that that would include UNICODE filename support which I don't want to deal with. So calling
      * GetModuleFIleNameA(..) directly.
      */
-    DWORD length = sizeof(buffer);
-    DWORD num_bytes = GetModuleFileNameA(NULL, buffer, length);
-    if (num_bytes == static_cast<DWORD>(0))
+    DWORD num_bytes = GetModuleFileNameA(NULL, buffer, MAX_PATH);
+    if (num_bytes == 0)
     {
         throw PathException("Failed in GetModuleFileNameA call!");
     }
