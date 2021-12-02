@@ -91,13 +91,11 @@ Logger::~Logger()
 
 void Logger::close_logger_thread()
 {
-    std::cout << "Closing logger worker thread" << std::endl;
     this->stay_alive = false;
     if(this->thread != nullptr)
     {
         this->thread->join();
     }
-    std::cout << "Logger thread decomissioned" << std::endl;
 }
 
 bool Logger::is_logger_healthy()
