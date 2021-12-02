@@ -67,8 +67,8 @@ Logger::Logger()
     this->logger_healthy = false;
     this->filename = get_file_path();
     this->rotation = 0;
-    this->initialize_log();
     this->logger_healthy = true;
+    this->initialize_log();
 #if !defined(__EMSCRIPTEN_major__) // Do not write to file if we build as web app
     this->stay_alive = true;
     this->initialize_worker_thread();
@@ -132,11 +132,7 @@ std::string Logger::get_filename_rotated()
 
 void Logger::initialize_log()
 {
-    std::ofstream ofs;
-    ofs.open(this->get_filename_rotated(), std::ofstream::out | std::ofstream::app);
-    Message msg = create_message(PINFO, "Initializing ...");
-    ofs << fmt_message(msg);
-    ofs.close();
+    this->write_message_buffer("Initializing new log ...");
 }
 
 void Logger::rotate_log()
@@ -208,7 +204,7 @@ void Logger::warn(const std::string message, ...)
     if(this->stay_alive)
     {
         const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
-        active_q->push(msg);
+        this->active_q->push(msg);
     }
 }
 
