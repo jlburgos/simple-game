@@ -81,7 +81,6 @@ private:
     const std::string PINFO = "INFO";
     const std::string PWARN = "WARN";
     const std::string PERROR = "ERROR";
-    const std::size_t BUFFER_LIMIT = 256;
 
 #if !defined(__EMSCRIPTEN_major__)
     const unsigned int FILE_SIZE_LIMIT = 1E3; // 1,000 bytes

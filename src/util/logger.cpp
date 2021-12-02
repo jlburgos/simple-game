@@ -177,7 +177,7 @@ std::string Logger::get_file_path()
 void Logger::info(std::string message, ...)
 {
     std::string time = TimerNS::current_time();
-    char buffer[this->BUFFER_LIMIT];
+    char buffer[256];
     va_list args;
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
@@ -197,7 +197,7 @@ void Logger::info(std::string message, ...)
 void Logger::warn(const std::string message, ...)
 {
     std::string time = TimerNS::current_time();
-    char buffer[this->BUFFER_LIMIT];
+    char buffer[256];
     va_list args;
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
@@ -217,7 +217,7 @@ void Logger::warn(const std::string message, ...)
 void Logger::error(const std::string message, ...)
 {
     std::string time = TimerNS::current_time();
-    char buffer[this->BUFFER_LIMIT];
+    char buffer[256];
     va_list args;
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
