@@ -49,6 +49,13 @@ private:
 
     std::unique_ptr<std::thread> thread;
 
+    enum Flag
+    {
+        PINFO,
+        PWARN,
+        PERROR
+    };
+
     class Message
     {
     public:
@@ -59,6 +66,8 @@ private:
         std::thread::id threadid;
         std::string msg;
     };
+
+    Message create_message(Flag flag, std::string str);
     std::string fmt_message(const Logger::Message &msg);
     std::queue<Message> q1,q2;
     std::queue<Message> *active_q = &q1; // Initialize to this default
@@ -79,10 +88,6 @@ private:
     unsigned int rotation;
 
     void write_message_buffer(const std::string message);
-
-    const std::string PINFO = "INFO";
-    const std::string PWARN = "WARN";
-    const std::string PERROR = "ERROR";
 
 #if !defined(__EMSCRIPTEN_major__)
     const std::size_t FILE_SIZE_LIMIT = 1E3; // 1,000 bytes

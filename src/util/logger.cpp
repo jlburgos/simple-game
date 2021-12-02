@@ -134,6 +134,8 @@ void Logger::initialize_log()
 {
     std::ofstream ofs;
     ofs.open(this->get_filename_rotated(), std::ofstream::out | std::ofstream::app);
+    Message msg = create_message(PINFO, "Initializing ...");
+    ofs << fmt_message(msg);
     ofs.close();
 }
 
@@ -158,6 +160,24 @@ std::string Logger::get_file_path()
     return PathNS::get_bin_logs_path() + "/" + PathNS::get_exe_name_no_path();
 }
 
+Logger::Message Logger::create_message(Flag flag, std::string str)
+{
+    std::string f;
+    switch(flag)
+    {
+        case Flag::PINFO:
+            f = "INFO";
+            break;
+        case Flag::PWARN:
+            f = "WARN";
+            break;
+        case Flag::PERROR:
+            f = "ERROR";
+            break;
+    }
+    return Message(TimerNS::current_time(), f, std::this_thread::get_id(), str);
+}
+
 void Logger::info(const std::string message, ...)
 {
     std::string time = TimerNS::current_time();
@@ -166,7 +186,7 @@ void Logger::info(const std::string message, ...)
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
-    Message msg = Message(time, this->PINFO, std::this_thread::get_id(), std::string(buffer));
+    Message msg = create_message(PINFO, buffer);
     std::cout << this->fmt_message(msg) << std::endl;
     if(this->stay_alive)
     {
@@ -183,7 +203,7 @@ void Logger::warn(const std::string message, ...)
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
-    Message msg = Message(time, this->PWARN, std::this_thread::get_id(), std::string(buffer));
+    Message msg = create_message(PWARN, buffer);
     std::cout << this->fmt_message(msg) << std::endl;
     if(this->stay_alive)
     {
@@ -200,7 +220,7 @@ void Logger::error(const std::string message, ...)
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
-    Message msg = Message(time, this->PERROR, std::this_thread::get_id(), std::string(buffer));
+    Message msg = create_message(PERROR, buffer);
     std::cout << this->fmt_message(msg) << std::endl;
     if(this->stay_alive)
     {
