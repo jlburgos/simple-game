@@ -74,13 +74,13 @@ Logger::Logger()
         this->rotate_log();
     }
 #if !defined(__EMSCRIPTEN_major__) // Do not write to file if we build as web app
-    this->active_q = &this->q1;
     this->stay_alive = true;
+    this->active_q = &this->q1;
     this->initialize_worker_thread();
 #else
+    this->stay_alive = false;
     this->active_q = nullptr;
     this->thread = nullptr;
-    this->stay_alive = false;
 #endif
 }
 
