@@ -33,8 +33,7 @@ int main(void)
             mgr.start();
             mgr.close();
 
-            LOG.info("Program completed with status '%d'! Exiting in a couple seconds...", EXIT_SUCCESS);
-            sleep(2);
+            LOG.info("Program completed with status '%d'!", EXIT_SUCCESS);
             rc = EXIT_SUCCESS;
         }
     }
