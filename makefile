@@ -16,7 +16,7 @@ CXX_STD=-std=c++17
 ## Need to determine absolute project directory path
 ifeq ($(OS), Windows_NT)
 CWD=$(shell powershell (Get-Location).path)
-ROOT_DIR=$(shell powershell (Get-Item -Path $(CWD)).BaseName)
+ROOT_DIR=$(shell powershell (Get-Item -Path "'$(CWD)'").BaseName)
 else
 CWD=$(shell pwd)
 ROOT_DIR=$(shell pwd | rev | cut -d'/' -f1 | rev)
