@@ -129,7 +129,7 @@ WASM_OPTS=\
 ######################################################################################################
 ######################################################################################################
 
-## Setting this when in windows creates race condition with the `powershell (... { mkdir })` portion
+## Setting this when not WIN since it creates a race condition with the `powershell (... { mkdir })` portion
 ifneq ($(OS), Windows_NT)
 MAKEFLAGS += -j$(NPROCS)
 endif
