@@ -16,153 +16,129 @@
 #include <cstdarg>
 #include <thread>
 #include <chrono>
+#include <iomanip>
 #include <filesystem>
 
-#include "path.hpp"
 #include "logger.hpp"
+#include "path.hpp"
 #include "timer.hpp"
 
 // Initialize static fields
-Logger *Logger::logger = nullptr;                 // Initialize singleton pointer
+const std::unique_ptr<Logger> Logger::logger = std::unique_ptr<Logger>(new Logger());
+std::once_flag Logger::init_flag;
+
 
 void manage_message_queue()
 {
-    std::queue<Logger::Message> *frozen_q = nullptr;
-    std::cout << "Beginning message queue log worker..." << std::endl;
     while(true)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-        if(LOG.stay_alive || !LOG.q1.empty() || !LOG.q2.empty())
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        if(LOG.thread_needed || !LOG.message_queue.empty())
         {
-            if(LOG.active_q == &LOG.q1)
-            {
-                const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
-                LOG.active_q = &LOG.q2;
-                frozen_q = &LOG.q1;
-            }
-            else
-            {
-                const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
-                LOG.active_q = &LOG.q1;
-                frozen_q = &LOG.q2;
-            }
+            LOG.write_message_buffers(LOG.message_queue);
         }
         else
         {
             break;
         }
-
-        while(!frozen_q->empty())
-        {
-            LOG.write_message_buffer(LOG.fmt_message(frozen_q->front()));
-            frozen_q->pop();
-        }
     }
-    std::cout << "Exiting message queue log worker..." << std::endl;
 }
 
 Logger::Logger()
 {
-    this->logger_healthy = false;
-    this->filename = get_file_path();
-    this->rotation = 0;
-    this->logger_healthy = true;
-    this->initialize_log();
-    while(std::filesystem::file_size(this->get_filename_rotated()) > 0)
-    {
-        this->rotate_log();
-    }
+    filename = get_file_path();
+    rotation = 0;
+    thread = nullptr;
 #if !defined(__EMSCRIPTEN_major__) // Do not write to file if we build as web app
-    this->stay_alive = true;
-    this->active_q = &this->q1;
-    this->initialize_worker_thread();
+    thread_needed = true;
 #else
-    this->stay_alive = false;
-    this->active_q = nullptr;
-    this->thread = nullptr;
+    thread_needed = false;
 #endif
 }
 
 Logger::~Logger()
 {
-    this->close_logger_thread();
-}
-
-void Logger::close_logger_thread()
-{
-    this->stay_alive = false;
-    if(this->thread != nullptr)
+    thread_needed = false;
+    if(thread != nullptr)
     {
-        this->thread->join();
+        thread->join();
     }
 }
 
-bool Logger::is_logger_healthy()
+bool Logger::is_thread_needed()
 {
-    return this->logger_healthy;
+    return thread_needed;
 }
 
-bool Logger::is_stay_alive()
+const std::unique_ptr<Logger> &Logger::get_logger()
 {
-    return this->stay_alive;
-}
-
-Logger *Logger::get_logger()
-{
-    if(logger == nullptr)
-    {
-        logger = new Logger();
-    }
     return logger;
+}
+
+void Logger::init()
+{
+    std::call_once(Logger::init_flag, Logger::init_components);
+}
+
+void Logger::init_components()
+{
+    logger->initialize_log();
+    while (std::filesystem::file_size(logger->get_filename_rotated()) > 0)
+    {
+        logger->rotate_log();
+    }
+    if (logger->is_thread_needed())
+    {
+        logger->initialize_worker_thread();
+    }
 }
 
 void Logger::initialize_worker_thread()
 {
-    this->thread = std::unique_ptr<std::thread>(new std::thread(manage_message_queue));
-}
-
-std::string Logger::get_filename_raw()
-{
-    return this->filename;
+    thread = std::unique_ptr<std::thread>(new std::thread(manage_message_queue));
 }
 
 std::string Logger::get_filename_rotated()
 {
     std::stringstream ss;
-    ss << this->get_filename_raw() << "." << static_cast<int>(this->get_rotation()) << ".log";
+    ss << filename << "." << static_cast<int>(get_rotation()) << ".log";
     return ss.str();
 }
 
 void Logger::initialize_log()
 {
     std::ofstream ofs;
-    ofs.open(this->get_filename_rotated(), std::ofstream::out | std::ofstream::app);
+    ofs.open(get_filename_rotated(), std::ofstream::out | std::ofstream::app);
     ofs.close();
 }
 
 void Logger::rotate_log()
 {
-    this->set_rotation(this->rotation + 1);
-    this->initialize_log();
+    set_rotation(rotation + 1);
+    initialize_log();
 }
 
 unsigned int Logger::get_rotation()
 {
-    return this->rotation;
+    return rotation;
 }
 
 void Logger::set_rotation(unsigned int rot)
 {
-    this->rotation = rot;
+    rotation = rot;
 }
 
 std::string Logger::get_file_path()
 {
+    /*
+    std::stringstream ss;
+    ss << std::quoted(PathNS::get_bin_logs_path() + "/" + PathNS::get_exe_name_no_path());
+    return ss.str();
+    */
     return PathNS::get_bin_logs_path() + "/" + PathNS::get_exe_name_no_path();
 }
 
-Logger::Message Logger::create_message(Flag flag, std::string str)
+Message Logger::create_message(Flag flag, const std::string &str)
 {
     std::string f;
     switch(flag)
@@ -188,12 +164,11 @@ void Logger::info(const std::string message, ...)
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
-    Message msg = create_message(PINFO, buffer);
-    std::cout << this->fmt_message(msg) << std::endl;
-    if(this->stay_alive)
+    Message msg = create_message(Flag::PINFO, buffer);
+    std::cout << fmt_message(msg) << std::endl;
+    if(thread_needed)
     {
-        const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
-        active_q->push(msg);
+        message_queue.push(msg);
     }
 }
 
@@ -205,12 +180,11 @@ void Logger::warn(const std::string message, ...)
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
-    Message msg = create_message(PWARN, buffer);
-    std::cout << this->fmt_message(msg) << std::endl;
-    if(this->stay_alive)
+    Message msg = create_message(Flag::PWARN, buffer);
+    std::cout << fmt_message(msg) << std::endl;
+    if(thread_needed)
     {
-        const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
-        this->active_q->push(msg);
+        message_queue.push(msg);
     }
 }
 
@@ -222,28 +196,42 @@ void Logger::error(const std::string message, ...)
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
-    Message msg = create_message(PERROR, buffer);
-    std::cout << this->fmt_message(msg) << std::endl;
-    if(this->stay_alive)
+    Message msg = create_message(Flag::PERROR, buffer);
+    std::cout << fmt_message(msg) << std::endl;
+    if(thread_needed)
     {
-        const std::lock_guard<std::mutex> lock(LOG.logger_mutex);
-        this->active_q->push(msg);
+        message_queue.push(msg);
     }
 }
 
-void Logger::write_message_buffer(const std::string message)
+void Logger::write_message_buffer(const std::string &message)
 {
-    while(std::filesystem::file_size(this->get_filename_rotated()) > this->FILE_SIZE_LIMIT)
+    while(std::filesystem::file_size(get_filename_rotated()) > FILE_SIZE_LIMIT)
     {
-        this->rotate_log();
+        rotate_log();
     }
     std::ofstream ofs;
-    ofs.open(this->get_filename_rotated(), std::ofstream::out | std::ofstream::app);
+    ofs.open(get_filename_rotated(), std::ofstream::out | std::ofstream::app);
     ofs << message << std::endl;
     ofs.close();
 }
 
-std::string Logger::fmt_message(const Logger::Message &msg)
+void Logger::write_message_buffers(ConcurrentQueue<Message> &messages)
+{
+    while(std::filesystem::file_size(get_filename_rotated()) > FILE_SIZE_LIMIT)
+    {
+        rotate_log();
+    }
+    std::ofstream ofs;
+    ofs.open(get_filename_rotated(), std::ofstream::out | std::ofstream::app);
+    while(!messages.empty() && !ofs.fail()) // If fail, stop writing and close stream
+    {
+        ofs << fmt_message(messages.pop()) << "\n";
+    }
+    ofs.close();
+}
+
+std::string Logger::fmt_message(const Message &msg)
 {
     std::stringstream ss;
     ss << "[" << msg.timestamp << "][THREAD " << msg.threadid << "] " << msg.flag << ": " << msg.msg;
