@@ -33,9 +33,9 @@ void manage_message_queue()
     while(true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        if(LOG.thread_needed || !LOG.message_queue.empty())
+        if(LOG.is_thread_needed() || !LOG.has_messages())
         {
-            LOG.write_message_buffers(LOG.message_queue);
+            LOG.write_message_buffers();
         }
         else
         {
@@ -46,9 +46,10 @@ void manage_message_queue()
 
 Logger::Logger()
 {
-    filename = get_file_path();
+    health_status = false;
     rotation = 0;
     thread = nullptr;
+    filename = get_file_path();
 #if !defined(__EMSCRIPTEN_major__) // Do not write to file if we build as web app
     thread_needed = true;
 #else
@@ -65,14 +66,29 @@ Logger::~Logger()
     }
 }
 
-bool Logger::is_thread_needed()
+const std::unique_ptr<Logger> &Logger::get_logger()
+{
+    return logger;
+}
+
+const bool &Logger::is_thread_needed()
 {
     return thread_needed;
 }
 
-const std::unique_ptr<Logger> &Logger::get_logger()
+const bool &Logger::get_health_status()
 {
-    return logger;
+    return health_status;
+}
+
+bool Logger::has_messages()
+{
+    return !message_queue.empty();
+}
+
+void Logger::set_health_status(const bool status)
+{
+    health_status = status;
 }
 
 void Logger::init()
@@ -91,6 +107,7 @@ void Logger::init_components()
     {
         logger->initialize_worker_thread();
     }
+    logger->set_health_status(true);
 }
 
 void Logger::initialize_worker_thread()
@@ -216,7 +233,7 @@ void Logger::write_message_buffer(const std::string &message)
     ofs.close();
 }
 
-void Logger::write_message_buffers(ConcurrentQueue<Message> &messages)
+void Logger::write_message_buffers()
 {
     while(std::filesystem::file_size(get_filename_rotated()) > FILE_SIZE_LIMIT)
     {
@@ -224,9 +241,9 @@ void Logger::write_message_buffers(ConcurrentQueue<Message> &messages)
     }
     std::ofstream ofs;
     ofs.open(get_filename_rotated(), std::ofstream::out | std::ofstream::app);
-    while(!messages.empty() && !ofs.fail()) // If fail, stop writing and close stream
+    while(!message_queue.empty() && !ofs.fail()) // If fail, stop writing and close stream
     {
-        ofs << fmt_message(messages.pop()) << "\n";
+        ofs << fmt_message(message_queue.pop()) << "\n";
     }
     ofs.close();
 }

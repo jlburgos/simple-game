@@ -28,7 +28,9 @@ public:
     void info(const std::string message, ...);
     void warn(const std::string message, ...);
     void error(const std::string message, ...);
-    bool is_thread_needed();
+    const bool &is_thread_needed();
+    const bool &get_health_status();
+    bool has_messages();
     friend void manage_message_queue();
 
     class LoggerException : public std::runtime_error
@@ -50,6 +52,9 @@ private:
     static std::once_flag init_flag;
     static const std::unique_ptr<Logger> logger;
 
+    bool health_status;
+    void set_health_status(const bool status);
+
     bool thread_needed;
     void initialize_worker_thread();
 
@@ -65,7 +70,7 @@ private:
     Message create_message(Flag flag, const std::string &str);
     std::string fmt_message(const Message &msg);
     void write_message_buffer(const std::string &message);
-    void write_message_buffers(ConcurrentQueue<Message> &messages);
+    void write_message_buffers();
     ConcurrentQueue<Message> message_queue;
 
     std::string get_filename_rotated();

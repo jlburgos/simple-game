@@ -62,7 +62,7 @@ int main(void)
     catch (...)
     {
         std::string msg = "Exception: Unknown exception occurred!";
-        if(Logger::get_logger() != nullptr)
+        if(LOG.get_health_status())
         {
             LOG.error(msg);
         }
