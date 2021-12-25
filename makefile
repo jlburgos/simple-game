@@ -129,31 +129,42 @@ WASM_OPTS=\
 ######################################################################################################
 ######################################################################################################
 
-#default: tools assets simple-game
-default: simple-game
+## Setting this when in windows creates race condition with the `powershell (... { mkdir })` portion
+ifneq ($(OS), Windows_NT)
+MAKEFLAGS += -j$(NPROCS)
+endif
 
-wasm: #tools assets
-	docker run \
-		--rm \
-		--volume $(CWD):/$(ROOT_DIR) \
-		emscripten/emsdk /bin/bash -c \
-			"$(PIP) install requests && $(EMXX) /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
+OBJS_SRC  := $(wildcard src/util/*.cpp src/*.cpp)
+OBJS_O    += $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.o))
 
-.PHONY: simple-game
-simple-game:
-	$(CXX) src/*.cpp src/util/*.cpp src/view/*.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
+######################################################################################################
+######################################################################################################
 
-## Note: Disabling asset compile pipeline experiments for now
+## top-level rule to create the basic program
+all: $(BIN_NAME)
 
-#.PHONY: $(IMG_ASSETS)
-#assets: $(IMG_ASSETS)
-#$(IMG_ASSETS):
-#	$(IMG_TO_HPP) $@ src/pre-compiled-assets/$(notdir $@).hpp
+clean:
+ifeq ($(OS),Windows_NT)
+	powershell Remove-Item -path $(BUILD_DIR) -recurse
+else
+	$(RM) -r $(BUILD_DIR)
+endif
 
-#.PHONY: $(TOOLS)
-#tools: $(TOOLS)
-#$(TOOLS):
-#	$(MAKE) -C $@
+$(BIN_NAME): $(OBJS_O)
+	$(CXX) -o $(BIN_DIR)/$@ $(OBJS_O) $(OPTS)
 
-#all: tools img_assets default wasm
-all: default wasm
+$(BUILD_DIR)/%.o: %.cpp
+ifeq ($(OS), Windows_NT)
+	powershell if (-not (Test-Path -Path '$(@D)' -PathType Container)) { $$output_sink = mkdir -p '$(@D)' }
+else
+	mkdir -p '$(@D)'
+endif
+	$(CXX) $(OPTS) -c -o $@ $<
+
+## Note: Disabling compile pipeline experiments for now
+#wasm: #tools assets
+#	docker run \
+#		--rm \
+#		--volume $(ROOT_DIR):/$(ROOT_DIR) \
+#		emscripten/emsdk /bin/bash -c \
+#			"$(PIP) install requests && $(EMXX) /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
