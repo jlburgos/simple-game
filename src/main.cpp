@@ -17,11 +17,13 @@ int main(void)
     int rc = EXIT_FAILURE;
     try
     {
+        Logger::init();
         LOG.info("Starting program...");
-        SDL_SetMainReady();
-        WindowManager mgr;
 
+        SDL_SetMainReady();
         LOG.info("Initializing window manager...");
+
+        WindowManager mgr;
         rc = mgr.init();
         if (rc != 0)
         {
@@ -47,8 +49,8 @@ int main(void)
     }
     catch (const std::exception &ex)
     {
-        std::string msg = "Exception: " + std::string(ex.what());
-        if(Logger::get_logger() != nullptr && LOG.is_logger_healthy())
+        std::string msg = "Std Exception: " + std::string(ex.what());
+        if(LOG.get_health_status())
         {
             LOG.error(msg);
         }
@@ -60,7 +62,7 @@ int main(void)
     catch (...)
     {
         std::string msg = "Exception: Unknown exception occurred!";
-        if(Logger::get_logger() != nullptr && LOG.is_logger_healthy())
+        if(LOG.get_health_status())
         {
             LOG.error(msg);
         }
@@ -69,9 +71,6 @@ int main(void)
             std::cerr << msg << std::endl;
         }
     }
-    if (Logger::get_logger() != nullptr && LOG.is_logger_healthy())
-    {
-        LOG.close_logger_thread();
-    }
+
     return rc;
 }

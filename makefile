@@ -12,63 +12,77 @@ PIP=pip
 ## C++ standard
 CXX_STD=-std=c++17
 
-## CWD
 ## Need to determine absolute project directory path
 ifeq ($(OS), Windows_NT)
-CWD=$(shell powershell (Get-Location).path)
-ROOT_DIR=$(shell powershell (Get-Item -Path $(CWD)).BaseName)
+CWD := $(shell powershell (Get-Location).path)
+ROOT_DIR := $(shell powershell (Get-Item -Path "'$(CWD)'").BaseName)
 else
-CWD=$(shell pwd)
-ROOT_DIR=$(shell pwd | rev | cut -d'/' -f1 | rev)
+ROOT_DIR := $(shell pwd | rev | cut -d'/' -f1 | rev)
 endif
 
 ## Binary
-BIN_NAME=$(ROOT_DIR)
-BIN_DIR=bin
+BIN_NAME  = $(ROOT_DIR)
+BIN_DIR   = bin
+BUILD_DIR = build
 
 ## Assets
-RESOURCES=assets
-IMG_ASSETS=$(wildcard $(RESOURCES)/test-imgs/*)
-PRE_COMP_ASSETS=src/pre-compiled-assets
+#RESOURCES  = assets
+#IMG_ASSETS = $(wildcard $(RESOURCES)/test-imgs/*)
+#PRE_COMP_ASSETS = src/pre-compiled-assets
 
 ## Tools
-IMG_TO_HPP=tools/img_to_hpp/bin/img_to_hpp
+#IMG_TO_HPP=tools/img_to_hpp/bin/img_to_hpp
 #TOOLS=$(wildcard tools/*)
-TOOLS=$(wildcard tools/img_to_hpp)
+#TOOLS=$(wildcard tools/img_to_hpp)
 
 ######################################################################################################
 ######################################################################################################
+
+## Note: Add the '-mwindows' option to remove the terminal pop-up when double-clicking the game.exe file
+##       https://gcc.gnu.org/onlinedocs/gcc/x86-Windows-Options.html
+#WINDOWS_FLAGS=-mwindows
+
+## OS Flags
+## Notes: https://stackoverflow.com/questions/20673370/why-do-we-write-d-reentrant-while-compiling-c-code-using-threads
+OS_SPECIFIC_FLAGS=
+ifneq ($(OS), Windows_NT)
+OS_SPECIFIC_FLAGS=\
+	-lpthread \
+	-D_REENTRANT
+endif
 
 ## SDL Flags
 SDL_FLAGS=\
-	-l SDL2main \
-	-l SDL2 \
-	-l SDL2_image \
-	-l SDL2_ttf \
-	-I external-dep/SDL2/inc \
-	-L external-dep/SDL2/lib
+	-lSDL2main \
+	-lSDL2 \
+	-lSDL2_image \
+	-lSDL2_ttf
+ifeq ($(OS), Windows_NT)
+SDL_FLAGS+=\
+	-Iexternal-dep/SDL2/inc \
+	-Lexternal-dep/SDL2/lib
+else
+SDL_FLAGS+=\
+	$(shell sdl2-config --cflags)
+endif
 
 WASM_SDL_FLAGS=\
-	-s USE_SDL=2 \
-	-s USE_SDL_IMAGE=2 \
-	-s USE_SDL_TTF=2 \
-	-s SDL2_IMAGE_FORMATS="[png,bmp,jpg]" \
-	-s LLD_REPORT_UNDEFINED \
-	-s WASM=1 \
+	-sUSE_SDL=2 \
+	-sUSE_SDL_IMAGE=2 \
+	-sUSE_SDL_TTF=2 \
+	-sSDL2_IMAGE_FORMATS="[png,bmp,jpg]" \
+	-sLLD_REPORT_UNDEFINED \
+	-sWASM=1 \
 	-v \
 	--closure 1 \
 	--minify 0 \
 	--bind
 
-## Note: Add the '-mwindows' option to remove the terminal pop-up when double-clicking the game.exe file
-##       https://gcc.gnu.org/onlinedocs/gcc/x86-Windows-Options.html
-WINDOWS_FLAGS=-mwindows
-
 ## OPTIMIZATION
 ## Note: The "Og" g++ option enables optimizations that do not interfere with debugging
 ##       But "em++" doesn't seem to like it :(
-#OPTIMIZATION=-Og
-OPTIMIZATION=-O2
+OPTIMIZATION=-Og
+#OPTIMIZATION=-O2
 
 ## Compiler flags to check "almost everything" because g++ doesn't have a "-Weverything-i-want" flag :P
 ## Notes: https://stackoverflow.com/questions/5088460/flags-to-enable-thorough-and-verbose-g-warnings
@@ -100,12 +114,14 @@ CXX_COMPILER_FLAGS=\
 ## Aggregated compiler flags
 OPTS=\
 	$(OPTIMIZATION) \
+	$(OS_SPECIFIC_FLAGS) \
 	$(CXX_STD) \
 	$(SDL_FLAGS) \
 	$(CXX_COMPILER_FLAGS)
 
 WASM_OPTS=\
 	$(OPTIMIZATION) \
+	$(OS_SPECIFIC_FLAGS) \
 	$(CXX_STD) \
 	$(WASM_SDL_FLAGS) \
 	$(CXX_COMPILER_FLAGS)
@@ -113,31 +129,42 @@ WASM_OPTS=\
 ######################################################################################################
 ######################################################################################################
 
-#default: tools assets simple-game
-default: simple-game
+## Setting this when in windows creates race condition with the `powershell (... { mkdir })` portion
+ifneq ($(OS), Windows_NT)
+MAKEFLAGS += -j$(NPROCS)
+endif
 
-wasm: #tools assets
-	docker run \
-		--rm \
-		--volume $(CWD):/$(ROOT_DIR) \
-		emscripten/emsdk /bin/bash -c \
-			"$(PIP) install requests && $(EMXX) /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
+OBJS_SRC  := $(wildcard src/util/*.cpp src/*.cpp)
+OBJS_O    += $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.o))
 
-.PHONY: simple-game
-simple-game:
-	$(CXX) src/*.cpp src/util/*.cpp src/view/*.cpp -o $(BIN_DIR)/$(BIN_NAME) $(OPTS)
+######################################################################################################
+######################################################################################################
 
-## Note: Disabling asset compile pipeline experiments for now
+## top-level rule to create the basic program
+all: $(BIN_NAME)
 
-#.PHONY: $(IMG_ASSETS)
-#assets: $(IMG_ASSETS)
-#$(IMG_ASSETS):
-#	$(IMG_TO_HPP) $@ src/pre-compiled-assets/$(notdir $@).hpp
+clean:
+ifeq ($(OS),Windows_NT)
+	powershell Remove-Item -path $(BUILD_DIR) -recurse
+else
+	$(RM) -r $(BUILD_DIR)
+endif
 
-#.PHONY: $(TOOLS)
-#tools: $(TOOLS)
-#$(TOOLS):
-#	$(MAKE) -C $@
+$(BIN_NAME): $(OBJS_O)
+	$(CXX) -o $(BIN_DIR)/$@ $(OBJS_O) $(OPTS)
 
-#all: tools img_assets default wasm
-all: default wasm
+$(BUILD_DIR)/%.o: %.cpp
+ifeq ($(OS), Windows_NT)
+	powershell if (-not (Test-Path -Path '$(@D)' -PathType Container)) { $$output_sink = mkdir -p '$(@D)' }
+else
+	mkdir -p '$(@D)'
+endif
+	$(CXX) $(OPTS) -c -o $@ $<
+
+## Note: Disabling compile pipeline experiments for now
+#wasm: #tools assets
+#	docker run \
+#		--rm \
+#		--volume $(ROOT_DIR):/$(ROOT_DIR) \
+#		emscripten/emsdk /bin/bash -c \
+#			"$(PIP) install requests && $(EMXX) /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"

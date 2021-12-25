@@ -13,22 +13,25 @@
 #define _LOGGER_HPP
 
 #include <string>
-#include <mutex>
-#include <queue>
 #include <thread>
 #include <memory>
+
+#include "concurrent_queue.hpp"
+#include "message.hpp"
 
 class Logger
 {
 public:
-    static Logger *get_logger();
+    static const std::unique_ptr<Logger> &get_logger();
+    static void init();
+
     void info(const std::string message, ...);
     void warn(const std::string message, ...);
     void error(const std::string message, ...);
-    bool is_logger_healthy();
-    bool is_stay_alive();
+    const bool &is_thread_needed();
+    const bool &get_health_status();
+    bool has_messages();
     friend void manage_message_queue();
-    void close_logger_thread();
 
     class LoggerException : public std::runtime_error
     {
@@ -39,13 +42,21 @@ public:
         }
     };
 
-private:
-    // Constructors and assignment operator are private because this is to be a singleton obj
-    Logger();
     ~Logger();
 
-    bool logger_healthy;
-    bool stay_alive;
+private:
+    // Constructor is private because this is to be a singleton obj
+    Logger();
+
+    static void init_components();
+    static std::once_flag init_flag;
+    static const std::unique_ptr<Logger> logger;
+
+    bool health_status;
+    void set_health_status(const bool status);
+
+    bool thread_needed;
+    void initialize_worker_thread();
 
     std::unique_ptr<std::thread> thread;
 
@@ -56,43 +67,22 @@ private:
         PERROR
     };
 
-    class Message
-    {
-    public:
-        Message(std::string t, std::string f, std::thread::id id, std::string m) : timestamp(t), flag(f), threadid(id), msg(m) {}
-        ~Message() {}
-        std::string timestamp;
-        std::string flag;
-        std::thread::id threadid;
-        std::string msg;
-    };
+    Message create_message(Flag flag, const std::string &str);
+    std::string fmt_message(const Message &msg);
+    void write_message_buffer(const std::string &message);
+    void write_message_buffers();
+    ConcurrentQueue<Message> message_queue;
 
-    Message create_message(Flag flag, std::string str);
-    std::string fmt_message(const Logger::Message &msg);
-    std::queue<Message> q1, q2;
-    std::queue<Message> *active_q;
-    void initialize_worker_thread();
-
-    std::string get_filename_raw();
     std::string get_filename_rotated();
     std::string get_file_path();
-
     void initialize_log();
     void rotate_log();
     void set_rotation(unsigned int rot);
     unsigned int get_rotation();
     
-    static Logger *logger;
-
+    const std::size_t FILE_SIZE_LIMIT = 1E4; // 10,000 bytes
     std::string filename;
     unsigned int rotation;
-
-    void write_message_buffer(const std::string message);
-
-#if !defined(__EMSCRIPTEN_major__)
-    const std::size_t FILE_SIZE_LIMIT = 1E4; // 10,000 bytes
-    std::mutex logger_mutex;
-#endif
 }; 
 
 // Define global logger
