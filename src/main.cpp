@@ -45,7 +45,7 @@ int main(void)
     }
     catch (const Logger::LoggerException &ex)
     {
-        std::cerr << "Logger Exception: "<< ex.what() << std::endl;
+        std::cerr << "Logger Exception: " << ex.what() << std::endl;
     }
     catch (const std::exception &ex)
     {
