@@ -49,7 +49,6 @@ Logger::Logger()
     health_status = false;
     rotation = 0;
     thread = nullptr;
-    filename = get_file_path();
 #if !defined(__EMSCRIPTEN_major__) // Do not write to file if we build as web app
     thread_needed = true;
 #else
@@ -124,6 +123,7 @@ std::string Logger::get_filename_rotated()
 
 void Logger::initialize_log()
 {
+    filename = get_file_path();
     std::ofstream ofs;
     ofs.open(get_filename_rotated(), std::ofstream::out | std::ofstream::app);
     ofs.close();
