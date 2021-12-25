@@ -50,7 +50,7 @@ int main(void)
     catch (const std::exception &ex)
     {
         std::string msg = "Std Exception: " + std::string(ex.what());
-        if(Logger::get_logger() != nullptr)
+        if(LOG.get_health_status())
         {
             LOG.error(msg);
         }
