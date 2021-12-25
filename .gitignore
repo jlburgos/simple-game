@@ -7,3 +7,6 @@ bin/logs/*log
 !bin/*dll
 !bin/README.md
 !bin/logs/README.md
+
+# Ignore build dir
+build
