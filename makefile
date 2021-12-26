@@ -57,14 +57,15 @@ SDL_FLAGS=\
 	-lSDL2main \
 	-lSDL2 \
 	-lSDL2_image \
-	-lSDL2_ttf
+	-lSDL2_ttf \
+	-Iexternal-dep/SDL2/inc
 ifeq ($(OS), Windows_NT)
 SDL_FLAGS+=\
-	-Iexternal-dep/SDL2/inc \
 	-Lexternal-dep/SDL2/lib
-else
-SDL_FLAGS+=\
-	$(shell sdl2-config --cflags)
+## Note: Commented this out since I want to make sure the same SDL2 deps are used for both WIN/Linux
+#else
+#SDL_FLAGS+=\
+#	$(shell sdl2-config --cflags)
 endif
 
 WASM_SDL_FLAGS=\
