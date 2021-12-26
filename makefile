@@ -132,8 +132,8 @@ WASM_OPTS=\
 
 DIRS      := $(SRC_DIR) $(SRC_DIR)/util
 OBJS_SRC  := $(foreach DIR,$(DIRS),$(wildcard $(DIR)/*.cpp))
-OBJS_O    += $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.o))
-DIRS_O    += $(addprefix $(BUILD_DIR)/, $(DIRS))
+OBJS_O    := $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.o))
+DIRS_O    := $(addprefix $(BUILD_DIR)/, $(DIRS))
 
 ######################################################################################################
 ######################################################################################################
