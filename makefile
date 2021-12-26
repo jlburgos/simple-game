@@ -179,7 +179,7 @@ $(BIN_NAME): $(OBJS_O)
 clean:
 ifeq ($(OS),Windows_NT)
 	powershell if (Test-Path -Path '$(BUILD_DIR)' -PathType Container) { Remove-Item -path $(BUILD_DIR) -recurse }
-	powershell if (Test-Path -Path '$(BIN_DIR)/$(BIN_NAME).exe' -PathType Leaf) { powershell Remove-Item -path $(BIN_DIR)/$(BIN_NAME).exe }
+	powershell if (Test-Path -Path '$(BIN_DIR)/$(BIN_NAME).exe' -PathType Leaf) { Remove-Item -path $(BIN_DIR)/$(BIN_NAME).exe }
 else
 	$(RM) -r $(BUILD_DIR)
 	$(RM) $(BIN_DIR)/$(BIN_NAME)
