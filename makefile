@@ -20,7 +20,7 @@ else
 ROOT_DIR := $(shell pwd | rev | cut -d'/' -f1 | rev)
 endif
 
-## Binary
+## Directories
 BIN_NAME  = $(ROOT_DIR)
 SRC_DIR   = src
 BIN_DIR   = bin
