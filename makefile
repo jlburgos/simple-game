@@ -90,11 +90,11 @@ OPTIMIZATION=-Og
 ## Notes: https://stackoverflow.com/questions/5088460/flags-to-enable-thorough-and-verbose-g-warnings
 CXX_COMPILER_FLAGS=\
 	-Wall \
-	-pedantic \
-	-pedantic-errors -Wextra -Wcast-align \
+	-Wempty-body -Werror -Werror=maybe-uninitialized -Warray-bounds \
+	-pedantic -pedantic-errors -Wextra -Wcast-align \
 	-Wcast-qual -Wconversion \
 	-Wdisabled-optimization \
-	-Werror -Wfloat-equal -Wformat=2 \
+	-Wfloat-equal -Wformat=2 \
 	-Wformat-nonliteral -Wformat-security  \
 	-Wformat-y2k \
 	-Wimport  -Winit-self  -Winline \
