@@ -175,7 +175,7 @@ $(BIN_NAME): $(OBJS_O)
 #			"$(PIP) install requests && $(EMXX) /$(BUILD_DIR)/$(SRC_DIR)/*.cpp -o /$(BUILD_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
 
 ## Clean build artifacts
-## Note: WIN compile adds the '.exe' suffix, so need to manually add it here when cleaning up
+## Note: WIN compile adds the '.exe' file extension, so need to manually add it here when cleaning up
 clean:
 ifeq ($(OS),Windows_NT)
 	powershell if (Test-Path -Path '$(BUILD_DIR)' -PathType Container) { Remove-Item -path $(BUILD_DIR) -recurse }
