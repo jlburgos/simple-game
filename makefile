@@ -22,13 +22,14 @@ endif
 
 ## Binary
 BIN_NAME  = $(ROOT_DIR)
+SRC_DIR   = src
 BIN_DIR   = bin
 BUILD_DIR = build
 
 ## Assets
 #RESOURCES  = assets
 #IMG_ASSETS = $(wildcard $(RESOURCES)/test-imgs/*)
-#PRE_COMP_ASSETS = src/pre-compiled-assets
+#PRE_COMP_ASSETS = $(SRC_DIR)/pre-compiled-assets
 
 ## Tools
 #IMG_TO_HPP=tools/img_to_hpp/bin/img_to_hpp
@@ -129,42 +130,54 @@ WASM_OPTS=\
 ######################################################################################################
 ######################################################################################################
 
-## Setting this when not WIN since it creates a race condition with the `powershell (... { mkdir })` portion
-ifneq ($(OS), Windows_NT)
-MAKEFLAGS += -j$(NPROCS)
-endif
-
-OBJS_SRC  := $(wildcard src/util/*.cpp src/*.cpp)
+DIRS      := $(SRC_DIR) $(SRC_DIR)/util
+OBJS_SRC  := $(foreach DIR,$(DIRS),$(wildcard $(DIR)/*.cpp))
 OBJS_O    += $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.o))
+DIRS_O    += $(addprefix $(BUILD_DIR)/, $(DIRS))
 
 ######################################################################################################
 ######################################################################################################
 
-## top-level rule to create the basic program
-all: $(BIN_NAME)
+## Top-level rule to create build directory structure and compile the basic program
+## Note: Separate into two consecutive $(MAKE) calls to control parallelism
+MAKEFLAGS += -j$(NPROCS)
+all:
+	$(MAKE) BUILD_DIRS
+	$(MAKE) $(BIN_NAME)
 
-clean:
-ifeq ($(OS),Windows_NT)
-	powershell Remove-Item -path $(BUILD_DIR) -recurse
+## Generate build directory structure
+BUILD_DIRS: $(DIRS_O)
+$(DIRS_O):
+ifeq ($(OS), Windows_NT)
+	powershell if (-not (Test-Path -Path '$@' -PathType Container)) { $$output_sink = mkdir '$@' }
 else
-	$(RM) -r $(BUILD_DIR)
+	mkdir -p '$@'
 endif
 
+## Compile CPP object files
+$(BUILD_DIR)/%.o: %.cpp
+	$(CXX) $(OPTS) -c -o $@ $<
+
+## Compile final binary
 $(BIN_NAME): $(OBJS_O)
 	$(CXX) -o $(BIN_DIR)/$@ $(OBJS_O) $(OPTS)
 
-$(BUILD_DIR)/%.o: %.cpp
-ifeq ($(OS), Windows_NT)
-	powershell if (-not (Test-Path -Path '$(@D)' -PathType Container)) { $$output_sink = mkdir -p '$(@D)' }
-else
-	mkdir -p '$(@D)'
-endif
-	$(CXX) $(OPTS) -c -o $@ $<
-
+## Compile web-assembly version using docker container
 ## Note: Disabling compile pipeline experiments for now
-#wasm: #tools assets
+#wasm:
 #	docker run \
 #		--rm \
-#		--volume $(ROOT_DIR):/$(ROOT_DIR) \
+#		--volume $(ROOT_DIR):/$(BUILD_DIR) \
 #		emscripten/emsdk /bin/bash -c \
-#			"$(PIP) install requests && $(EMXX) /$(ROOT_DIR)/src/*.cpp -o /$(ROOT_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
+#			"$(PIP) install requests && $(EMXX) /$(BUILD_DIR)/$(SRC_DIR)/*.cpp -o /$(BUILD_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
+
+## Clean build artifacts
+## Note: WIN compile adds the '.exe' suffix, so need to manually add it here when cleaning up
+clean:
+ifeq ($(OS),Windows_NT)
+	powershell if (Test-Path -Path '$(BUILD_DIR)' -PathType Container) { Remove-Item -path $(BUILD_DIR) -recurse }
+	powershell if (Test-Path -Path '$(BIN_DIR)/$(BIN_NAME).exe' -PathType Leaf) { powershell Remove-Item -path $(BIN_DIR)/$(BIN_NAME).exe }
+else
+	$(RM) -r $(BUILD_DIR)
+	$(RM) $(BIN_DIR)/$(BIN_NAME)
+endif
