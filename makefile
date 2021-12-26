@@ -159,7 +159,7 @@ endif
 
 ## Compile CPP object files
 $(BUILD_DIR)/%.o: %.cpp
-	$(CXX) $(OPTS) -c -o $@ $<
+	$(CXX) -c -o $@ $< $(OPTS)
 
 ## Compile final binary
 $(BIN_NAME): $(OBJS_O)
