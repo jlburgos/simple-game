@@ -143,13 +143,13 @@ DIRS_O    := $(addprefix $(BUILD_DIR)/, $(DIRS))
 ## Note: Separate into two consecutive $(MAKE) calls to control parallelism
 MAKEFLAGS += -j$(NPROCS)
 all:
-	$(MAKE) BUILD_DIRS
+	$(MAKE) build_dirs
 	$(MAKE) $(BIN_NAME)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
 ##       returns a large string that we want to ignore.
-BUILD_DIRS: $(DIRS_O)
+build_dirs: $(DIRS_O)
 $(DIRS_O):
 ifeq ($(OS), Windows_NT)
 	powershell if (-not (Test-Path -Path '$@' -PathType Container)) { $$output_sink = mkdir '$@' }
