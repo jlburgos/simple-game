@@ -31,7 +31,6 @@
 
 #include "util/path.hpp"
 #include "util/timer.hpp"
-#include "util/message_queue.hpp"
 #include "util/logger.hpp"
 #include "window_manager.hpp"
 
