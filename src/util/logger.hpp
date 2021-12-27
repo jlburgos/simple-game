@@ -16,7 +16,7 @@
 #include <thread>
 #include <memory>
 
-#include "concurrent_queue.hpp"
+#include "message_queue.hpp"
 #include "message.hpp"
 
 class Logger
@@ -71,7 +71,7 @@ private:
     std::string fmt_message(const Message &msg);
     void write_message_buffer(const std::string &message);
     void write_message_buffers();
-    ConcurrentQueue<Message> message_queue;
+    MessageQueue<Message> message_queue;
 
     std::string get_filename_rotated();
     std::string get_file_path();

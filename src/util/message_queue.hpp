@@ -17,11 +17,11 @@
 #include <cstddef>
 
 template <class T>
-class ConcurrentQueue
+class MessageQueue
 {
 public:
-    ConcurrentQueue() {}
-    ~ConcurrentQueue() {}
+    MessageQueue() {}
+    ~MessageQueue() {}
 
     bool empty() const
     {
