@@ -17,59 +17,48 @@ int main(void)
     int rc = EXIT_FAILURE;
     try
     {
-        Logger::init();
-        LOG.info("Starting program...");
-
         SDL_SetMainReady();
-        LOG.info("Initializing window manager...");
 
+        // Initialize custom logger
+        Logger::init();
+        if(atexit(&Logger::cleanup) != 0)
+        {
+            Logger::cleanup(); // Manually cleanup then throw exception
+            throw Logger::LoggerException("Failed to call configure Logger cleanup call on program exit");
+        }
+
+        SDL_Log("Initializing window manager...");
         WindowManager mgr;
         rc = mgr.init();
         if (rc != 0)
         {
-            LOG.error("Failed to initialize program!\n");
+            SDL_Log("Failed to initialize program!\n");
         }
         else
         {
-            LOG.info("Initialization completed! Bringing up window now...");
+            SDL_Log("Initialization completed! Bringing up window now...");
             mgr.start();
             mgr.close();
 
-            LOG.info("Program completed with status '%d'!", EXIT_SUCCESS);
+            SDL_Log("Program completed with status '%d'!", EXIT_SUCCESS);
             rc = EXIT_SUCCESS;
         }
     }
     catch (const PathNS::PathException &ex)
     {
-        std::cerr << "Path Exception: " << ex.what() << std::endl;
+        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Path Exception: %s", ex.what());
     }
     catch (const Logger::LoggerException &ex)
     {
-        std::cerr << "Logger Exception: " << ex.what() << std::endl;
+        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Logger Exception: %s", ex.what());
     }
     catch (const std::exception &ex)
     {
-        std::string msg = "Std Exception: " + std::string(ex.what());
-        if(LOG.get_health_status())
-        {
-            LOG.error(msg);
-        }
-        else
-        {
-            std::cerr << msg << std::endl;
-        }
+        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Exception: %s", ex.what());
     }
     catch (...)
     {
-        std::string msg = "Exception: Unknown exception occurred!";
-        if(LOG.get_health_status())
-        {
-            LOG.error(msg);
-        }
-        else
-        {
-            std::cerr << msg << std::endl;
-        }
+        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Unknown Exception Occurred");
     }
 
     return rc;

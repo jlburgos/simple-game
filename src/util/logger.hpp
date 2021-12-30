@@ -12,6 +12,8 @@
 #ifndef _LOGGER_HPP
 #define _LOGGER_HPP
 
+#include <SDL2/SDL.h>
+
 #include <string>
 #include <thread>
 #include <memory>
@@ -22,16 +24,12 @@
 class Logger
 {
 public:
-    static const std::unique_ptr<Logger> &get_logger();
     static void init();
+    static void cleanup();
+    ~Logger(); // Needs to be public
 
-    void info(const std::string message, ...);
-    void warn(const std::string message, ...);
-    void error(const std::string message, ...);
-    const bool &is_thread_needed();
-    const bool &get_health_status();
-    bool has_messages();
-    friend void manage_message_queue();
+    static bool is_thread_needed();
+    static bool get_health_status();
 
     class LoggerException : public std::runtime_error
     {
@@ -42,50 +40,57 @@ public:
         }
     };
 
-    ~Logger();
-
 private:
     // Constructor is private because this is to be a singleton obj
     Logger();
-
-    static void init_components();
+    
+    static bool health_status;
+    static bool thread_needed;
+    static const std::size_t FILE_SIZE_LIMIT;
+    static std::string filename;
+    static std::size_t rotation;
+    static MessageQueue<Message> message_queue;
     static std::once_flag init_flag;
-    static const std::unique_ptr<Logger> logger;
-
-    bool health_status;
-    void set_health_status(const bool status);
-
-    bool thread_needed;
-    void initialize_worker_thread();
-
-    std::unique_ptr<std::thread> thread;
 
     enum Flag
     {
         PINFO,
         PWARN,
-        PERROR
+        PERROR,
+        PVERBOSE,
+        PDEBUG,
+        PCRITICAL
     };
 
-    Message create_message(Flag flag, const std::string &str);
-    std::string fmt_message(const Message &msg);
-    void write_message_buffer(const std::string &message);
-    void write_message_buffers();
-    MessageQueue<Message> message_queue;
+    // Function matching the callbackSignature (SDL_LogOutputFunction)
+    static void SDL_Logger_Callback(void *userdata, int category, SDL_LogPriority priority, const char *message);
+    static void log(Logger::Flag flag, const std::string &message);
+    /*
+    static void info(const std::string message, ...);
+    static void warn(const std::string message, ...);
+    static void error(const std::string message, ...);
+    */
 
-    std::string get_filename_rotated();
-    std::string get_file_path();
-    void initialize_log();
-    void rotate_log();
-    void set_rotation(unsigned int rot);
-    unsigned int get_rotation();
-    
-    const std::size_t FILE_SIZE_LIMIT = 1E4; // 10,000 bytes
-    std::string filename;
-    unsigned int rotation;
+    static void set_health_status(const bool status);
+    static bool has_messages();
+
+    static void init_log();
+    static void init_components();
+    static void init_worker_thread();
+    friend void manage_message_queue();
+
+    static std::unique_ptr<std::thread> thread;
+
+    static Message create_message(Flag flag, const std::string &str);
+    static std::string fmt_message(const Message &msg);
+    static void write_message_buffer(const std::string &message);
+    static void write_message_buffers();
+
+    static std::string get_filename_rotated();
+    static std::string get_file_path();
+    static void rotate_log();
+    static void set_rotation(std::size_t rot);
+    static std::size_t get_rotation();
 }; 
-
-// Define global logger
-#define LOG (*Logger::get_logger())
 
 #endif /* _LOGGER_HPP */
