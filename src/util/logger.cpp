@@ -231,7 +231,6 @@ Message Logger::create_message(Flag flag, const std::string &str)
 
 void Logger::log(Logger::Flag flag, const std::string &str)
 {
-    std::string time = TimerNS::current_time();
     Message msg = create_message(flag, str);
     std::clog << fmt_message(msg) << std::endl;
     if(thread_needed)
@@ -243,7 +242,6 @@ void Logger::log(Logger::Flag flag, const std::string &str)
 /*
 void Logger::info(const std::string message, ...)
 {
-    std::string time = TimerNS::current_time();
     char buffer[256];
     va_list args;
     va_start(args, message);
@@ -259,7 +257,6 @@ void Logger::info(const std::string message, ...)
 
 void Logger::warn(const std::string message, ...)
 {
-    std::string time = TimerNS::current_time();
     char buffer[256];
     va_list args;
     va_start(args, message);
@@ -275,7 +272,6 @@ void Logger::warn(const std::string message, ...)
 
 void Logger::error(const std::string message, ...)
 {
-    std::string time = TimerNS::current_time();
     char buffer[256];
     va_list args;
     va_start(args, message);
