@@ -48,8 +48,7 @@ BUILD_DIR = build
 OS_SPECIFIC_FLAGS=
 ifneq ($(OS), Windows_NT)
 OS_SPECIFIC_FLAGS=\
-	-lpthread \
-	-D_REENTRANT
+	-pthread
 endif
 
 ## SDL Flags
