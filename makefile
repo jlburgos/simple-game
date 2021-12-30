@@ -107,7 +107,7 @@ CXX_COMPILER_FLAGS=\
 	-Wswitch-enum \
 	-Wvariadic-macros \
 	-Wwrite-strings \
-	-Wunreachable-code -Wunused -Wunused-parameter
+	-Wunreachable-code -Wunused -Wunused-variable -Wunused-parameter
 
 ######################################################################################################
 ######################################################################################################
