@@ -124,11 +124,6 @@ void Logger::SDL_Logger_Callback(void *userdata, int category, SDL_LogPriority p
 {
     (void) userdata;
     (void) category;
-    /*
-     * // TODO
-     * 1. What is userdata?
-     * 2. What is category?
-     */
 
     /* Notes:
      * https://wiki.libsdl.org/SDL_Log
