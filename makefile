@@ -88,26 +88,23 @@ OPTIMIZATION=-Og
 ## Compiler flags to check "almost everything" because g++ doesn't have a "-Weverything-i-want" flag :P
 ## Notes: https://stackoverflow.com/questions/5088460/flags-to-enable-thorough-and-verbose-g-warnings
 CXX_COMPILER_FLAGS=\
-	-Wall \
-	-Wempty-body -Werror -Werror=maybe-uninitialized -Warray-bounds \
-	-pedantic -pedantic-errors -Wextra -Wcast-align \
+	-Wall -Wextra -Werror -Wmaybe-uninitialized \
+	-Wempty-body -Warray-bounds \
+	-pedantic -pedantic-errors -Wcast-align \
 	-Wcast-qual -Wconversion \
 	-Wdisabled-optimization \
-	-Wfloat-equal -Wformat=2 \
-	-Wformat-nonliteral -Wformat-security  \
-	-Wformat-y2k \
+	-Wfloat-equal -Wlong-long \
 	-Wimport  -Winit-self  -Winline \
-	-Wlong-long \
 	-Wmissing-field-initializers -Wmissing-format-attribute \
 	-Wmissing-include-dirs -Wmissing-noreturn \
 	-Wpacked -Wpointer-arith \
 	-Wredundant-decls \
 	-Wshadow -Wstack-protector \
-	-Wstrict-aliasing=2 \
+	-Wstrict-aliasing=2 -Wformat=2 -Wformat-nonliteral -Wformat-security -Wformat-y2k \
 	-Wswitch-enum \
 	-Wvariadic-macros \
 	-Wwrite-strings \
-	-Wunreachable-code -Wunused -Wunused-variable -Wunused-parameter
+	-Wunreachable-code
 
 ######################################################################################################
 ######################################################################################################
