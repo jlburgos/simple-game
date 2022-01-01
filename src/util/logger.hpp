@@ -49,7 +49,7 @@ private:
     static const std::size_t FILE_SIZE_LIMIT;
     static std::string filename;
     static std::size_t rotation;
-    static MessageQueue<Message> message_queue;
+    static MessageQueue message_queue;
     static std::once_flag init_flag;
 
     enum Flag

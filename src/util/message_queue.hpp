@@ -16,39 +16,21 @@
 #include <mutex>
 #include <cstddef>
 
-template <class T>
+#include "message.hpp"
+
 class MessageQueue
 {
 public:
-    MessageQueue() {}
-    ~MessageQueue() {}
+    MessageQueue();
+    ~MessageQueue();
 
-    bool empty() const
-    {
-        return size() == 0;
-    }
-
-    std::size_t size() const
-    {
-        return queue.size();
-    }
-
-    void push(const T value)
-    {
-        const std::lock_guard<std::mutex> lock(mutex);
-        queue.push(value);
-    }
-
-    T pop()
-    {
-        const std::lock_guard<std::mutex> lock(mutex);
-        T value = queue.front();
-        queue.pop();
-        return value;
-    }
+    bool empty() const;
+    std::size_t size() const;
+    void push(const Message message);
+    Message pop();
 
 private:
-    std::queue<T> queue;
+    std::queue<Message> queue;
     mutable std::mutex mutex;
 };
 

@@ -29,7 +29,7 @@ std::unique_ptr<std::thread> Logger::thread;
 const std::size_t Logger::FILE_SIZE_LIMIT = 1E4; // 10,000 bytes
 bool Logger::health_status = false;
 bool Logger::thread_needed = false;
-MessageQueue<Message> Logger::message_queue;
+MessageQueue Logger::message_queue;
 std::string Logger::filename = "";
 std::size_t Logger::rotation;
 
