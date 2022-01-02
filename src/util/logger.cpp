@@ -56,11 +56,6 @@ Logger::Logger()
 
 Logger::~Logger()
 {
-    thread_needed = false;
-    if(thread != nullptr)
-    {
-        thread->join();
-    }
 }
 
 bool Logger::is_thread_needed()
@@ -100,23 +95,23 @@ void Logger::init()
 void Logger::init_components()
 {
     thread = nullptr;
-    rotation = 0;
-    health_status = false;
-#if !defined(__EMSCRIPTEN_major__) // Do not write to file if we build as web app
+#if !defined(__EMSCRIPTEN_major__)
     thread_needed = true;
 #else
     thread_needed = false;
 #endif
+    rotation = 0;
+    health_status = false;
     Logger::init_log();
     while (std::filesystem::file_size(Logger::get_filename_rotated()) > 0)
     {
         Logger::rotate_log();
     }
-    if (Logger::is_thread_needed())
+    if (thread_needed)
     {
         Logger::init_worker_thread();
     }
-    Logger::set_health_status(true);
+    health_status = true;
     SDL_LogSetOutputFunction(&Logger::SDL_Logger_Callback, NULL);
 }
 
@@ -153,7 +148,6 @@ void Logger::SDL_Logger_Callback(void *userdata, int category, SDL_LogPriority p
             break;
         case SDL_NUM_LOG_PRIORITIES:
             throw LoggerException("Invalid message priority \"SDL_NUM_LOG_PRIORITIES\" received");
-            break;
         default:
             std::stringstream ss;
             ss << "Unknown message priority \"" << priority << "\" received";
@@ -163,13 +157,13 @@ void Logger::SDL_Logger_Callback(void *userdata, int category, SDL_LogPriority p
 
 void Logger::init_worker_thread()
 {
-    Logger::thread = std::unique_ptr<std::thread>(new std::thread(manage_message_queue));
+    Logger::thread = std::unique_ptr<std::thread>(new std::thread(&manage_message_queue));
 }
 
 std::string Logger::get_filename_rotated()
 {
     std::stringstream ss;
-    ss << filename << "." << static_cast<int>(get_rotation()) << ".log";
+    ss << filename << "." << get_rotation() << ".log";
     return ss.str();
 }
 
