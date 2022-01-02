@@ -31,7 +31,7 @@ public:
 
 private:
     std::queue<Message> queue;
-    mutable std::mutex mutex;
+    std::mutex mutex;
 };
 
 #endif /* __MESSAGE_QUEUE */
