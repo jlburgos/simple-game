@@ -21,11 +21,6 @@ int main(void)
 
         // Initialize custom logger
         Logger::init();
-        if(atexit(&Logger::cleanup) != 0)
-        {
-            Logger::cleanup(); // Manually cleanup then throw exception
-            throw Logger::LoggerException("Failed to call configure Logger cleanup call on program exit");
-        }
 
         SDL_Log("Initializing window manager...");
         WindowManager mgr;
