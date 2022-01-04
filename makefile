@@ -136,7 +136,6 @@ DIRS_O    := $(addprefix $(BUILD_DIR)/, $(DIRS))
 ######################################################################################################
 
 ## Top-level rule to create build directory structure and compile the basic program
-## Note: Separate into two consecutive $(MAKE) calls to control parallelism
 MAKEFLAGS += -j$(NPROCS)
 all: $(DIRS_O)
 	$(MAKE) $(BIN_NAME)
