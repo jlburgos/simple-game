@@ -138,17 +138,17 @@ void Logger::SDL_Logger_Callback(void *userdata, int category, SDL_LogPriority p
         case SDL_LOG_PRIORITY_WARN:
             Logger::log(Logger::Flag::PWARN, message);
             break;
+        case SDL_LOG_PRIORITY_ERROR:
+            Logger::log(Logger::Flag::PERROR, message);
+            break;
+        case SDL_LOG_PRIORITY_CRITICAL:
+            Logger::log(Logger::Flag::PCRITICAL, message);
+            break;
         case SDL_LOG_PRIORITY_VERBOSE:
             Logger::log(Logger::Flag::PVERBOSE, message);
             break;
         case SDL_LOG_PRIORITY_DEBUG:
             Logger::log(Logger::Flag::PDEBUG, message);
-            break;
-        case SDL_LOG_PRIORITY_CRITICAL:
-            Logger::log(Logger::Flag::PCRITICAL, message);
-            break;
-        case SDL_LOG_PRIORITY_ERROR:
-            Logger::log(Logger::Flag::PERROR, message);
             break;
         case SDL_NUM_LOG_PRIORITIES:
             throw LoggerException("Invalid message priority \"SDL_NUM_LOG_PRIORITIES\" received");
