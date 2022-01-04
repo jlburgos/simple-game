@@ -9,6 +9,9 @@
  *
  */
 
+#ifndef __MESSAGE
+#define __MESSAGE
+
 #include <string>
 #include <thread>
 
@@ -22,3 +25,5 @@ public:
     std::thread::id threadid;
     std::string msg;
 };
+
+#endif /* __MESSAGE */

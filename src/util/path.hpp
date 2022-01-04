@@ -26,16 +26,23 @@ namespace PathNS
         }
     };
 
+    // Cache results of first queries to basic filesystem paths
+    namespace
+    {
+        std::string exe_path,
+                    exe_path_no_ext,
+                    exe_name_no_path,
+                    root_path = "";
+    }
+
     std::string get_exe_path();
     std::string get_exe_path_no_ext();
     std::string get_exe_name_no_path();
+    std::string get_root_path();
 
     std::string get_bin_path();
     std::string get_bin_logs_path();
-
     std::string get_assets_path();
-
-    std::string get_root_path();
 }
 
 #endif /* __PATH_HPP */

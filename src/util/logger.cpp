@@ -24,8 +24,14 @@
 #include "timer.hpp"
 
 // Initialize static fields
-const std::unique_ptr<Logger> Logger::logger = std::unique_ptr<Logger>(new Logger());
 std::once_flag Logger::init_flag;
+std::unique_ptr<std::thread> Logger::thread;
+const std::size_t Logger::FILE_SIZE_LIMIT = 1E4; // 10,000 bytes
+bool Logger::health_status = false;
+bool Logger::thread_needed = false;
+MessageQueue Logger::message_queue;
+std::string Logger::filename = "";
+std::size_t Logger::rotation;
 
 
 void manage_message_queue()
@@ -33,9 +39,9 @@ void manage_message_queue()
     while(true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        if(LOG.is_thread_needed() || !LOG.has_messages())
+        if(Logger::is_thread_needed() || !Logger::has_messages())
         {
-            LOG.write_message_buffers();
+            Logger::write_message_buffers();
         }
         else
         {
@@ -46,48 +52,39 @@ void manage_message_queue()
 
 Logger::Logger()
 {
-    health_status = false;
-    rotation = 0;
-    thread = nullptr;
-#if !defined(__EMSCRIPTEN_major__) // Do not write to file if we build as web app
-    thread_needed = true;
-#else
-    thread_needed = false;
-#endif
 }
 
 Logger::~Logger()
 {
-    thread_needed = false;
-    if(thread != nullptr)
-    {
-        thread->join();
-    }
 }
 
-const std::unique_ptr<Logger> &Logger::get_logger()
-{
-    return logger;
-}
-
-const bool &Logger::is_thread_needed()
+bool Logger::is_thread_needed()
 {
     return thread_needed;
 }
 
-const bool &Logger::get_health_status()
+bool Logger::get_health_status()
 {
     return health_status;
 }
 
 bool Logger::has_messages()
 {
-    return !message_queue.empty();
+    return !Logger::message_queue.empty();
 }
 
 void Logger::set_health_status(const bool status)
 {
     health_status = status;
+}
+
+void Logger::cleanup()
+{
+    thread_needed = false;
+    if(thread != nullptr)
+    {
+        thread->join();
+    }
 }
 
 void Logger::init()
@@ -97,31 +94,84 @@ void Logger::init()
 
 void Logger::init_components()
 {
-    logger->initialize_log();
-    while (std::filesystem::file_size(logger->get_filename_rotated()) > 0)
+    if (std::atexit(&Logger::cleanup) != 0)
     {
-        logger->rotate_log();
+        throw Logger::LoggerException("Failed to call configure Logger cleanup call on program exit");
     }
-    if (logger->is_thread_needed())
+    thread = nullptr;
+#if !defined(__EMSCRIPTEN_major__)
+    thread_needed = true;
+#else
+    thread_needed = false;
+#endif
+    rotation = 0;
+    health_status = false;
+    Logger::init_log();
+    while (std::filesystem::file_size(Logger::get_filename_rotated()) > 0)
     {
-        logger->initialize_worker_thread();
+        Logger::rotate_log();
     }
-    logger->set_health_status(true);
+    if (thread_needed)
+    {
+        Logger::init_worker_thread();
+    }
+    health_status = true;
+    SDL_LogSetOutputFunction(&Logger::SDL_Logger_Callback, NULL);
 }
 
-void Logger::initialize_worker_thread()
+void Logger::SDL_Logger_Callback(void *userdata, int category, SDL_LogPriority priority, const char *message)
 {
-    thread = std::unique_ptr<std::thread>(new std::thread(manage_message_queue));
+    (void) userdata;
+    (void) category;
+
+    /* Notes:
+     * https://wiki.libsdl.org/SDL_Log
+     * ^^^ Alias to https://wiki.libsdl.org/SDL_LogInfo
+     * https://wiki.libsdl.org/SDL_LogError
+     * https://wiki.libsdl.org/SDL_LOG_CATEGORY
+     */
+    switch(priority)
+    {
+        case SDL_LOG_PRIORITY_INFO:
+            Logger::log(Logger::Flag::PINFO, message);
+            break;
+        case SDL_LOG_PRIORITY_WARN:
+            Logger::log(Logger::Flag::PWARN, message);
+            break;
+        case SDL_LOG_PRIORITY_ERROR:
+            Logger::log(Logger::Flag::PERROR, message);
+            break;
+        case SDL_LOG_PRIORITY_CRITICAL:
+            Logger::log(Logger::Flag::PCRITICAL, message);
+            break;
+        case SDL_LOG_PRIORITY_VERBOSE:
+            Logger::log(Logger::Flag::PVERBOSE, message);
+            break;
+        case SDL_LOG_PRIORITY_DEBUG:
+            Logger::log(Logger::Flag::PDEBUG, message);
+            break;
+        case SDL_NUM_LOG_PRIORITIES:
+            throw LoggerException("Invalid message priority \"SDL_NUM_LOG_PRIORITIES\" received");
+        default:
+            std::stringstream ss;
+            ss << "Unknown message priority \"" << priority << "\" received";
+            throw LoggerException(ss.str().c_str());
+    }
+}
+
+void Logger::init_worker_thread()
+{
+    Logger::thread = std::unique_ptr<std::thread>(new std::thread(&manage_message_queue));
 }
 
 std::string Logger::get_filename_rotated()
 {
     std::stringstream ss;
-    ss << filename << "." << static_cast<int>(get_rotation()) << ".log";
+    ss << filename << "." << get_rotation() << ".log";
     return ss.str();
 }
 
-void Logger::initialize_log()
+void Logger::init_log()
 {
     filename = get_file_path();
     std::ofstream ofs;
@@ -132,26 +182,21 @@ void Logger::initialize_log()
 void Logger::rotate_log()
 {
     set_rotation(rotation + 1);
-    initialize_log();
+    init_log();
 }
 
-unsigned int Logger::get_rotation()
+std::size_t Logger::get_rotation()
 {
     return rotation;
 }
 
-void Logger::set_rotation(unsigned int rot)
+void Logger::set_rotation(std::size_t rot)
 {
     rotation = rot;
 }
 
 std::string Logger::get_file_path()
 {
-    /*
-    std::stringstream ss;
-    ss << std::quoted(PathNS::get_bin_logs_path() + "/" + PathNS::get_exe_name_no_path());
-    return ss.str();
-    */
     return PathNS::get_bin_logs_path() + "/" + PathNS::get_exe_name_no_path();
 }
 
@@ -160,29 +205,48 @@ Message Logger::create_message(Flag flag, const std::string &str)
     std::string f;
     switch(flag)
     {
-        case Flag::PINFO:
+        case Logger::Flag::PINFO:
             f = "INFO";
             break;
-        case Flag::PWARN:
+        case Logger::Flag::PWARN:
             f = "WARN";
             break;
-        case Flag::PERROR:
+        case Logger::Flag::PERROR:
             f = "ERROR";
+            break;
+        case Logger::Flag::PVERBOSE:
+            f = "CRITICAL";
+            break;
+        case Logger::Flag::PDEBUG:
+            f = "DEBUG";
+            break;
+        case Logger::Flag::PCRITICAL:
+            f = "CRITICAL";
             break;
     }
     return Message(TimerNS::current_time(), f, std::this_thread::get_id(), str);
 }
 
+void Logger::log(Logger::Flag flag, const std::string &str)
+{
+    Message msg = create_message(flag, str);
+    std::clog << fmt_message(msg) << std::endl;
+    if(thread_needed)
+    {
+        message_queue.push(msg);
+    }
+}
+
+/*
 void Logger::info(const std::string message, ...)
 {
-    std::string time = TimerNS::current_time();
     char buffer[256];
     va_list args;
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
     Message msg = create_message(Flag::PINFO, buffer);
-    std::cout << fmt_message(msg) << std::endl;
+    std::clog << fmt_message(msg) << std::endl;
     if(thread_needed)
     {
         message_queue.push(msg);
@@ -191,14 +255,13 @@ void Logger::info(const std::string message, ...)
 
 void Logger::warn(const std::string message, ...)
 {
-    std::string time = TimerNS::current_time();
     char buffer[256];
     va_list args;
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
     Message msg = create_message(Flag::PWARN, buffer);
-    std::cout << fmt_message(msg) << std::endl;
+    std::clog << fmt_message(msg) << std::endl;
     if(thread_needed)
     {
         message_queue.push(msg);
@@ -207,19 +270,19 @@ void Logger::warn(const std::string message, ...)
 
 void Logger::error(const std::string message, ...)
 {
-    std::string time = TimerNS::current_time();
     char buffer[256];
     va_list args;
     va_start(args, message);
     vsprintf(buffer, message.c_str(), args);
     va_end(args);
     Message msg = create_message(Flag::PERROR, buffer);
-    std::cout << fmt_message(msg) << std::endl;
+    std::cerr << fmt_message(msg) << std::endl;
     if(thread_needed)
     {
         message_queue.push(msg);
     }
 }
+*/
 
 void Logger::write_message_buffer(const std::string &message)
 {

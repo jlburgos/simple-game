@@ -48,8 +48,7 @@ BUILD_DIR = build
 OS_SPECIFIC_FLAGS=
 ifneq ($(OS), Windows_NT)
 OS_SPECIFIC_FLAGS=\
-	-lpthread \
-	-D_REENTRANT
+	-pthread
 endif
 
 ## SDL Flags
@@ -89,26 +88,23 @@ OPTIMIZATION=-Og
 ## Compiler flags to check "almost everything" because g++ doesn't have a "-Weverything-i-want" flag :P
 ## Notes: https://stackoverflow.com/questions/5088460/flags-to-enable-thorough-and-verbose-g-warnings
 CXX_COMPILER_FLAGS=\
-	-Wall \
-	-Wempty-body -Werror -Werror=maybe-uninitialized -Warray-bounds \
-	-pedantic -pedantic-errors -Wextra -Wcast-align \
+	-Wall -Wextra -Werror -Wmaybe-uninitialized \
+	-Wempty-body -Warray-bounds \
+	-pedantic -pedantic-errors -Wcast-align \
 	-Wcast-qual -Wconversion \
 	-Wdisabled-optimization \
-	-Wfloat-equal -Wformat=2 \
-	-Wformat-nonliteral -Wformat-security  \
-	-Wformat-y2k \
+	-Wfloat-equal -Wlong-long \
 	-Wimport  -Winit-self  -Winline \
-	-Wlong-long \
 	-Wmissing-field-initializers -Wmissing-format-attribute \
 	-Wmissing-include-dirs -Wmissing-noreturn \
 	-Wpacked -Wpointer-arith \
 	-Wredundant-decls \
 	-Wshadow -Wstack-protector \
-	-Wstrict-aliasing=2 \
+	-Wstrict-aliasing=2 -Wformat=2 -Wformat-nonliteral -Wformat-security -Wformat-y2k \
 	-Wswitch-enum \
 	-Wvariadic-macros \
 	-Wwrite-strings \
-	-Wunreachable-code -Wunused -Wunused-parameter
+	-Wunreachable-code
 
 ######################################################################################################
 ######################################################################################################
@@ -140,16 +136,13 @@ DIRS_O    := $(addprefix $(BUILD_DIR)/, $(DIRS))
 ######################################################################################################
 
 ## Top-level rule to create build directory structure and compile the basic program
-## Note: Separate into two consecutive $(MAKE) calls to control parallelism
 MAKEFLAGS += -j$(NPROCS)
-all:
-	$(MAKE) build_dirs
+all: $(DIRS_O)
 	$(MAKE) $(BIN_NAME)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
 ##       returns a large string that we want to ignore.
-build_dirs: $(DIRS_O)
 $(DIRS_O):
 ifeq ($(OS), Windows_NT)
 	powershell if (-not (Test-Path -Path '$@' -PathType Container)) { $$output_sink = mkdir '$@' }
