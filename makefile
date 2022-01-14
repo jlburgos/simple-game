@@ -150,17 +150,19 @@ endif
 ######################################################################################################
 ######################################################################################################
 
-## Note: This is usually fine but sometimes one of the build threads gets ahead and tries to access stuff that doesn't exist yet.
-##       If it causes a build issue, try modifying this flag or simply comment it out!
 MAKEFLAGS += -j$(NPROCS)
 
-## Top-level rule to create build directory structure and compile the basic program
-PHONY = all
-all: $(DIRS_O) $(DIRS_B) $(BIN_NAME)
+## Set up final binary name
+ifeq ($(OS), Windows_NT)
+BIN_TARGET := $(BIN_DIR)/$(BIN_NAME).exe
+else
+BIN_TARGET := $(BIN_DIR)/$(BIN_NAME)
+endif
 
-## Compile final binary
-$(BIN_NAME): $(DLLS_O) $(OBJS_O)
-	$(CXX) -o $(BIN_DIR)/$@ $(OBJS_O) $(OPTS)
+
+## Top-level rule to create build directory structure and compile the basic program
+$(BIN_TARGET): $(DIRS_O) $(DIRS_B) $(DLLS_O) $(OBJS_O)
+	$(CXX) -o $@ $(OBJS_O) $(OPTS)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
