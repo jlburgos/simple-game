@@ -21,7 +21,8 @@ ROOT_DIR := $(shell pwd | rev | cut -d'/' -f1 | rev)
 endif
 
 ## Directories
-BIN_NAME  = $(ROOT_DIR)
+BIN_NAME  := $(ROOT_DIR)
+DLLS_DIR  = external-dep/SDL2/dll
 SRC_DIR   = src
 BIN_DIR   = bin
 BUILD_DIR = build
@@ -127,25 +128,43 @@ WASM_OPTS=\
 ######################################################################################################
 ######################################################################################################
 
-DIRS      := $(SRC_DIR) $(SRC_DIR)/util
-OBJS_SRC  := $(foreach DIR,$(DIRS),$(wildcard $(DIR)/*.cpp))
+## Bin directory and log directory paths
+DIRS_B    := $(BIN_DIR) $(BIN_DIR)/logs
+
+## DLL files and output location where they will be copied
+DLLS_SRC  := $(wildcard $(DLLS_DIR)/*.dll)
+DLLS_O    := $(addprefix $(BIN_DIR)/, $(notdir $(DLLS_SRC)))
+
+## Source files and output location of compiled object files
+OBJS_SRC  := $(wildcard src/**/*.cpp src/*.cpp)
 OBJS_O    := $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.o))
-DIRS_O    := $(addprefix $(BUILD_DIR)/, $(DIRS))
+
+## Object file output directories
+## Note: 'DIRS_O' is calculated this way to get a unique list of sub-directories whereas doing $(dir $(OBJS_O)) would generate duplicates
+ifeq ($(OS), Windows_NT)
+DIRS_O    := $(addprefix $(BUILD_DIR)/, $(shell powershell 'Get-ChildItem -Path $(SRC_DIR) -Directory -Recurse | Resolve-Path -Relative'))
+else
+DIRS_O    := $(addprefix $(BUILD_DIR)/, $(shell find $(SRC_DIR)/* -type d))
+endif
 
 ######################################################################################################
 ######################################################################################################
 
 ## Top-level rule to create build directory structure and compile the basic program
 MAKEFLAGS += -j$(NPROCS)
-all: $(DIRS_O)
-	$(MAKE) $(BIN_NAME)
+PHONY = all
+all: $(DIRS_O) $(DIRS_B) $(BIN_NAME)
+
+## Compile final binary
+$(BIN_NAME): $(DLLS_O) $(OBJS_O)
+	$(CXX) -o $(BIN_DIR)/$@ $(OBJS_O) $(OPTS)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
 ##       returns a large string that we want to ignore.
-$(DIRS_O):
+$(DIRS_O) $(DIRS_B):
 ifeq ($(OS), Windows_NT)
-	powershell if (-not (Test-Path -Path '$@' -PathType Container)) { $$output_sink = mkdir '$@' }
+	powershell if (-not (Test-Path -Path '$@' -PathType Container)) { $$output_sink = New-Item -Path '$@' -ItemType Directory }
 else
 	mkdir -p '$@'
 endif
@@ -154,9 +173,12 @@ endif
 $(BUILD_DIR)/%.o: %.cpp
 	$(CXX) -c -o $@ $< $(OPTS)
 
-## Compile final binary
-$(BIN_NAME): $(OBJS_O)
-	$(CXX) -o $(BIN_DIR)/$@ $(OBJS_O) $(OPTS)
+$(DLLS_O):
+ifeq ($(OS), Windows_NT)
+	powershell Copy-Item -Path '$(addprefix $(DLLS_DIR)/, $(notdir $@))' -Destination '$@'
+else
+	cp -f '$(addprefix $(DLLS_DIR)/, $(notdir $@))' '$@'
+endif
 
 ## Compile web-assembly version using docker container
 ## Note: Disabling compile pipeline experiments for now
@@ -168,12 +190,14 @@ $(BIN_NAME): $(OBJS_O)
 #			"$(PIP) install requests && $(EMXX) /$(BUILD_DIR)/$(SRC_DIR)/*.cpp -o /$(BUILD_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
 
 ## Clean build artifacts
-## Note: WIN compile adds the '.exe' file extension, so need to manually add it here when cleaning up
+PHONY += clean
 clean:
 ifeq ($(OS),Windows_NT)
+	powershell if (Test-Path -Path '$(BIN_DIR)' -PathType Container) { Remove-Item -Path '$(BIN_DIR)' -recurse }
 	powershell if (Test-Path -Path '$(BUILD_DIR)' -PathType Container) { Remove-Item -Path '$(BUILD_DIR)' -recurse }
-	powershell if (Test-Path -Path '$(BIN_DIR)/$(BIN_NAME).exe' -PathType Leaf) { Remove-Item -Path '$(BIN_DIR)/$(BIN_NAME).exe' }
 else
 	$(RM) -r $(BUILD_DIR)
-	$(RM) $(BIN_DIR)/$(BIN_NAME)
+	$(RM) -r $(BIN_DIR)
 endif
+
+.PHONY := $(PHONY)

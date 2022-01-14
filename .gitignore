@@ -1,12 +1,8 @@
 # Ignore self
 #.gitignore
 
-# Ignore binaries
-bin/simple-game*
-bin/logs/*log
-!bin/*dll
-!bin/README.md
-!bin/logs/README.md
+# Ignore bin dir
+bin
 
 # Ignore build dir
 build

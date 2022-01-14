@@ -32,6 +32,6 @@
 #include "util/path.hpp"
 #include "util/timer.hpp"
 #include "util/logger.hpp"
-#include "window_manager.hpp"
+#include "manager/window_manager.hpp"
 
 #endif /* _HEADERS_HPP */

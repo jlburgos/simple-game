@@ -13,8 +13,8 @@
 #include <sstream>
 
 #include "window_manager.hpp"
-#include "util/path.hpp"
-#include "util/logger.hpp"
+#include "../util/path.hpp"
+#include "../util/logger.hpp"
 
 // Define static members
 const std::string WindowManager::DEFAULT_SCREEN_TITLE = "Game Window";
