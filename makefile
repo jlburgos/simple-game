@@ -150,8 +150,11 @@ endif
 ######################################################################################################
 ######################################################################################################
 
-## Top-level rule to create build directory structure and compile the basic program
+## Note: This is usually fine but sometimes one of the build threads gets ahead and tries to access stuff that doesn't exist yet.
+##       If it causes a build issue, try modifying this flag or simply comment it out!
 MAKEFLAGS += -j$(NPROCS)
+
+## Top-level rule to create build directory structure and compile the basic program
 PHONY = all
 all: $(DIRS_O) $(DIRS_B) $(BIN_NAME)
 
