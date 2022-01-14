@@ -152,8 +152,12 @@ endif
 
 ## Top-level rule to create build directory structure and compile the basic program
 MAKEFLAGS += -j$(NPROCS)
-all: $(DIRS_O) $(DIRS_B)
-	$(MAKE) $(BIN_NAME)
+PHONY = all
+all: $(DIRS_O) $(DIRS_B) $(BIN_NAME)
+
+## Compile final binary
+$(BIN_NAME): $(DLLS_O) $(OBJS_O)
+	$(CXX) -o $(BIN_DIR)/$@ $(OBJS_O) $(OPTS)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
@@ -176,11 +180,6 @@ else
 	cp -f '$(addprefix $(DLLS_DIR)/, $(notdir $@))' '$@'
 endif
 
-## Compile final binary
-$(BIN_NAME): $(DLLS_O) $(OBJS_O)
-	$(info OBJS_O:$(OBJS_O))
-	$(CXX) -o $(BIN_DIR)/$@ $(OBJS_O) $(OPTS)
-
 ## Compile web-assembly version using docker container
 ## Note: Disabling compile pipeline experiments for now
 #wasm:
@@ -191,6 +190,7 @@ $(BIN_NAME): $(DLLS_O) $(OBJS_O)
 #			"$(PIP) install requests && $(EMXX) /$(BUILD_DIR)/$(SRC_DIR)/*.cpp -o /$(BUILD_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
 
 ## Clean build artifacts
+PHONY += clean
 clean:
 ifeq ($(OS),Windows_NT)
 	powershell if (Test-Path -Path '$(BIN_DIR)' -PathType Container) { Remove-Item -Path '$(BIN_DIR)' -recurse }
@@ -199,3 +199,5 @@ else
 	$(RM) -r $(BUILD_DIR)
 	$(RM) -r $(BIN_DIR)
 endif
+
+.PHONY := $(PHONY)
