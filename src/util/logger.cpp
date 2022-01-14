@@ -96,7 +96,7 @@ void Logger::init_components()
 {
     if (std::atexit(Logger::cleanup) != 0)
     {
-        throw Logger::LoggerException("Failed to call configure Logger cleanup call on program exit");
+        throw Logger::LoggerException("Failed to configure Logger cleanup call on program exit");
     }
     thread = nullptr;
 #if !defined(__EMSCRIPTEN_major__)
