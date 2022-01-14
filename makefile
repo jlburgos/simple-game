@@ -162,7 +162,7 @@ endif
 
 ## Top-level rule to create build directory structure and compile the basic program
 $(BIN_TARGET): $(DIRS_O) $(DIRS_B) $(DLLS_O) $(OBJS_O)
-	$(CXX) -o $@ $(OBJS_O) $(OPTS)
+	$(CXX) -o '$@' $(OBJS_O) $(OPTS)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
@@ -176,7 +176,7 @@ endif
 
 ## Compile CPP object files
 $(BUILD_DIR)/%.o: %.cpp
-	$(CXX) -c -o $@ $< $(OPTS)
+	$(CXX) -c -o '$@' '$<' $(OPTS)
 
 $(DLLS_O):
 ifeq ($(OS), Windows_NT)
@@ -201,8 +201,8 @@ ifeq ($(OS),Windows_NT)
 	powershell if (Test-Path -Path '$(BIN_DIR)' -PathType Container) { Remove-Item -Path '$(BIN_DIR)' -recurse }
 	powershell if (Test-Path -Path '$(BUILD_DIR)' -PathType Container) { Remove-Item -Path '$(BUILD_DIR)' -recurse }
 else
-	$(RM) -r $(BUILD_DIR)
-	$(RM) -r $(BIN_DIR)
+	$(RM) -r '$(BUILD_DIR)'
+	$(RM) -r '$(BIN_DIR)'
 endif
 
 .PHONY := $(PHONY)
