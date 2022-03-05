@@ -15,8 +15,8 @@
 // Workaround for not using SDL_main() as entrypoint
 #define SDL_MAIN_HANDLED
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 
 #if defined(__EMSCRIPTEN_major__)
 #include <emscripten.h>

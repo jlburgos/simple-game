@@ -22,7 +22,6 @@ endif
 
 ## Directories
 BIN_NAME  := $(ROOT_DIR)
-DLLS_DIR  = external-dep/SDL2/dll
 SRC_DIR   = src
 BIN_DIR   = bin
 BUILD_DIR = build
@@ -59,24 +58,25 @@ SDL_FLAGS=\
 	-lSDL2_image \
 	-lSDL2_ttf
 
-## If manually set up SDL includes (.h files), we grab those
-ifeq ($(OS), Windows_NT)
-	ifneq ("$(wildcard external-dep/SDL2/inc)", "")
-SDL_FLAGS+=\
-	-Iexternal-dep/SDL2/inc
-	endif
-endif
-
-## If manually set up SDL libraries (.a & .la files), we grab those for windows
+## If manually set up SDL includes (.h files) and SDL libraries (.a & .la files), we grab those for windows
 ## Else for linux we get the flags from `sdl2-config --cflags`
+## Note: Grabbing 'release' builds from https://github.com/libsdl-org
+## ** https://github.com/libsdl-org/SDL/releases
+## ** https://github.com/libsdl-org/SDL_image/releases
+## ** https://github.com/libsdl-org/SDL_ttf/releases
+EXTERNAL_SDL2_DEP=../MINGW-SDL2
 ifeq ($(OS), Windows_NT)
-    ifneq ("$(wildcard external-dep/SDL2/lib)", "")
-SDL_FLAGS+=\
-	-Lexternal-dep/SDL2/lib
+	ifneq ("$(wildcard $(EXTERNAL_SDL2_DEP))","")
+INCLUDES := $(shell powershell 'Get-ChildItem "include" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "x86_64"} | Resolve-Path -Relative')
+INCLUDES := $(addprefix -I, $(addsuffix \SDL2, $(INCLUDES)))
+LIBRARIES := $(shell powershell 'Get-ChildItem "lib" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "x86_64"} | Resolve-Path -Relative')
+LIBRARIES := $(addprefix -L, $(LIBRARIES))
+SDL_FLAGS+=$(INCLUDES) $(LIBRARIES)
+	else
+$(error "Failed to locate expected '$(EXTERNAL_SDL2_DEP)' directory containing SDL2 dependencies!")
 	endif
 else
-SDL_FLAGS+=\
-	$(shell sdl2-config --cflags)
+SDL_FLAGS+=$(shell sdl2-config --cflags)
 endif
 
 WASM_SDL_FLAGS=\
@@ -143,7 +143,12 @@ WASM_OPTS=\
 DIRS_B    := $(BIN_DIR) $(BIN_DIR)/logs
 
 ## DLL files and output location where they will be copied
-DLLS_SRC  := $(wildcard $(DLLS_DIR)/*.dll)
+DLLS_DIR  := $(EXTERNAL_SDL2_DEP)
+ifeq ($(OS), Windows_NT)
+DLLS_SRC  := $(shell powershell 'Get-ChildItem "*.dll" -Path "$(DLLS_DIR)" -Recurse | Where {$$_.DirectoryName -match "x86_64-w64-mingw32"} | Resolve-Path -Relative')
+else
+DLLS_SRC  := $(shell find "$(DLLS_DIR)" -name "*.dll")
+endif
 DLLS_O    := $(addprefix $(BIN_DIR)/, $(notdir $(DLLS_SRC)))
 
 ## Source files and output location of compiled object files
@@ -170,7 +175,6 @@ else
 BIN_TARGET := $(BIN_DIR)/$(BIN_NAME)
 endif
 
-
 ## Top-level rule to create build directory structure and compile the basic program
 $(BIN_TARGET): $(DIRS_O) $(DIRS_B) $(OBJS_O) $(DLLS_O)
 	$(CXX) -o '$@' $(OBJS_O) $(OPTS)
@@ -189,11 +193,10 @@ endif
 $(BUILD_DIR)/%.o: %.cpp
 	$(CXX) -c -o '$@' '$<' $(OPTS)
 
+## Copy all the DLLs for Windows build
 $(DLLS_O):
 ifeq ($(OS), Windows_NT)
-	powershell 'Copy-Item -Path "$(addprefix $(DLLS_DIR)/, $(notdir $@))" -Destination "$@"'
-else
-	cp -f '$(addprefix $(DLLS_DIR)/, $(notdir $@))' '$@'
+	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(BIN_DIR)"'))
 endif
 
 ## Compile web-assembly version using docker container

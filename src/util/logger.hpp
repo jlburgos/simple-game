@@ -12,7 +12,7 @@
 #ifndef _LOGGER_HPP
 #define _LOGGER_HPP
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <string>
 #include <thread>
