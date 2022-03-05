@@ -14,8 +14,8 @@ CXX_STD=-std=c++17
 
 ## Need to determine absolute project directory path
 ifeq ($(OS), Windows_NT)
-CWD := $(shell powershell (Get-Location).path)
-ROOT_DIR := $(shell powershell (Get-Item -Path "'$(CWD)'").BaseName)
+CWD := $(shell powershell '(Get-Location).path')
+ROOT_DIR := $(shell powershell '(Get-Item -Path "'$(CWD)'").BaseName')
 else
 ROOT_DIR := $(shell pwd | rev | cut -d'/' -f1 | rev)
 endif
@@ -57,15 +57,26 @@ SDL_FLAGS=\
 	-lSDL2main \
 	-lSDL2 \
 	-lSDL2_image \
-	-lSDL2_ttf \
-	-Iexternal-dep/SDL2/inc
+	-lSDL2_ttf
+
+## If manually set up SDL includes (.h files), we grab those
 ifeq ($(OS), Windows_NT)
+	ifneq ("$(wildcard external-dep/SDL2/inc)", "")
+SDL_FLAGS+=\
+	-Iexternal-dep/SDL2/inc
+	endif
+endif
+
+## If manually set up SDL libraries (.a & .la files), we grab those for windows
+## Else for linux we get the flags from `sdl2-config --cflags`
+ifeq ($(OS), Windows_NT)
+    ifneq ("$(wildcard external-dep/SDL2/lib)", "")
 SDL_FLAGS+=\
 	-Lexternal-dep/SDL2/lib
-## Note: Commented this out since I want to make sure the same SDL2 deps are used for both WIN/Linux
-#else
-#SDL_FLAGS+=\
-#	$(shell sdl2-config --cflags)
+	endif
+else
+SDL_FLAGS+=\
+	$(shell sdl2-config --cflags)
 endif
 
 WASM_SDL_FLAGS=\
@@ -142,7 +153,7 @@ OBJS_O    := $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.o))
 ## Object file output directories
 ## Note: 'DIRS_O' is calculated this way to get a unique list of sub-directories whereas doing $(dir $(OBJS_O)) would generate duplicates
 ifeq ($(OS), Windows_NT)
-DIRS_O    := $(addprefix $(BUILD_DIR)/, $(shell powershell 'Get-ChildItem -Path $(SRC_DIR) -Directory -Recurse | Resolve-Path -Relative'))
+DIRS_O    := $(addprefix $(BUILD_DIR)/, $(shell powershell 'Get-ChildItem -Path "$(SRC_DIR)" -Directory -Recurse | Resolve-Path -Relative'))
 else
 DIRS_O    := $(addprefix $(BUILD_DIR)/, $(shell find $(SRC_DIR)/* -type d))
 endif
@@ -161,7 +172,7 @@ endif
 
 
 ## Top-level rule to create build directory structure and compile the basic program
-$(BIN_TARGET): $(DIRS_O) $(DIRS_B) $(DLLS_O) $(OBJS_O)
+$(BIN_TARGET): $(DIRS_O) $(DIRS_B) $(OBJS_O) $(DLLS_O)
 	$(CXX) -o '$@' $(OBJS_O) $(OPTS)
 
 ## Generate build directory structure
@@ -169,7 +180,7 @@ $(BIN_TARGET): $(DIRS_O) $(DIRS_B) $(DLLS_O) $(OBJS_O)
 ##       returns a large string that we want to ignore.
 $(DIRS_O) $(DIRS_B):
 ifeq ($(OS), Windows_NT)
-	powershell if (-not (Test-Path -Path '$@' -PathType Container)) { $$output_sink = New-Item -Path '$@' -ItemType Directory }
+	powershell 'if (-not (Test-Path -Path "$@" -PathType Container)) { $$output_sink = New-Item -Path "$@" -ItemType Directory }'
 else
 	mkdir -p '$@'
 endif
@@ -180,7 +191,7 @@ $(BUILD_DIR)/%.o: %.cpp
 
 $(DLLS_O):
 ifeq ($(OS), Windows_NT)
-	powershell Copy-Item -Path '$(addprefix $(DLLS_DIR)/, $(notdir $@))' -Destination '$@'
+	powershell 'Copy-Item -Path "$(addprefix $(DLLS_DIR)/, $(notdir $@))" -Destination "$@"'
 else
 	cp -f '$(addprefix $(DLLS_DIR)/, $(notdir $@))' '$@'
 endif
@@ -198,11 +209,12 @@ endif
 PHONY += clean
 clean:
 ifeq ($(OS),Windows_NT)
-	powershell if (Test-Path -Path '$(BIN_DIR)' -PathType Container) { Remove-Item -Path '$(BIN_DIR)' -recurse }
-	powershell if (Test-Path -Path '$(BUILD_DIR)' -PathType Container) { Remove-Item -Path '$(BUILD_DIR)' -recurse }
+	powershell 'if (Test-Path -Path "$(BIN_DIR)" -PathType Container) { Remove-Item -Path "$(BIN_DIR)" -recurse }'
+	powershell 'if (Test-Path -Path "$(BUILD_DIR)" -PathType Container) { Remove-Item -Path "$(BUILD_DIR)" -recurse }'
 else
 	$(RM) -r '$(BUILD_DIR)'
 	$(RM) -r '$(BIN_DIR)'
 endif
 
+## Set up .PHONY
 .PHONY := $(PHONY)
