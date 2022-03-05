@@ -52,9 +52,9 @@ int WindowManager::init()
     }
     // Create window
     window = SDL_CreateWindow(DEFAULT_SCREEN_TITLE.c_str(),
-                              SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                              DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
-                              SDL_WINDOW_SHOWN);
+                                SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
+                                SDL_WINDOW_SHOWN);
     if (window == nullptr)
     {
         SDL_Log("Failed to create SDL_Window: %s", SDL_GetError());
