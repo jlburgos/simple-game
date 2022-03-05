@@ -1,5 +1,8 @@
 # Simple Game
 
+## Idea
+This is a sandbox game project where I'm essentially going to through whatever I want at it as part of the learning process :-)
+
 ## Goals
 I wanted to accomplish several things with this coding project:
 1. Practice C/C++ coding.
@@ -8,14 +11,13 @@ I wanted to accomplish several things with this coding project:
 
 ## Technologies
 Several technologies that I am learning as part of this project:
-1. Chocolatey - https://docs.chocolatey.org/en-us/why
+1. SDL2 - https://www.libsdl.org/
 2. Emscripten - https://emscripten.org/docs/introducing_emscripten/about_emscripten.html
-3. SDL2 - https://www.libsdl.org/
-4. Visual Studio Code - https://code.visualstudio.com/
-5. Make - https://makefiletutorial.com/
-6. Powershell - https://docs.microsoft.com/en-us/learn/modules/introduction-to-powershell/
-7. Docker - https://www.docker.com/
-8. Git - https://git-scm.com/ | https://github.com/
+3. Visual Studio Code - https://code.visualstudio.com/
+4. Make - https://makefiletutorial.com/
+5. Powershell - https://docs.microsoft.com/en-us/learn/modules/introduction-to-powershell/
+6. Docker - https://www.docker.com/
+7. Git - https://git-scm.com/ | https://github.com/
 
 ## Useful Resources
 1. https://wiki.libsdl.org/Installation
