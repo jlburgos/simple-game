@@ -77,7 +77,7 @@ int WindowManager::init()
     surface_apple = IMG_Load(path.c_str());
     if(surface_apple == nullptr)
     {
-        SDL_Log("Failed to create apple surface: %s", SDL_GetError());
+        SDL_Log("Failed to create apple surface: %s", IMG_GetError());
         return 1;
     }
 
