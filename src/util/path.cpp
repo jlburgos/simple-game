@@ -9,10 +9,10 @@
  *
  */
 
-#ifdef __linux__
+#if defined(__linux__)
 #include <unistd.h>
 #define MAX_PATH 256
-#elif defined(__WIN32)
+#elif defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 #endif
 #include <iostream>
@@ -31,7 +31,7 @@ std::string PathNS::get_exe_path()
         {
             throw PathException("Failed in readlink call!");
         }
-#elif defined(__WIN32)
+#elif defined(_WIN32) || defined(_WIN64)
         /* Not calling GetModuleFileName(..) since it resolves to GetModuleFIleNameW since UNICODE is defined.
          * that that would include UNICODE filename support which I don't want to deal with. So calling
          * GetModuleFIleNameA(..) directly.
