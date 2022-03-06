@@ -64,12 +64,13 @@ SDL_FLAGS=\
 ## ** https://github.com/libsdl-org/SDL/releases
 ## ** https://github.com/libsdl-org/SDL_image/releases
 ## ** https://github.com/libsdl-org/SDL_ttf/releases
+PLATFORM_VERSION = x86_64
 EXTERNAL_SDL2_DEP=../MINGW-SDL2
 ifeq ($(OS), Windows_NT)
 	ifneq ("$(wildcard $(EXTERNAL_SDL2_DEP))","")
-INCLUDES := $(shell powershell 'Get-ChildItem "include" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "x86_64"} | Resolve-Path -Relative')
+INCLUDES := $(shell powershell 'Get-ChildItem "include" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
 INCLUDES := $(addprefix -I, $(addsuffix \SDL2, $(INCLUDES)))
-LIBRARIES := $(shell powershell 'Get-ChildItem "lib" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "x86_64"} | Resolve-Path -Relative')
+LIBRARIES := $(shell powershell 'Get-ChildItem "lib" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
 LIBRARIES := $(addprefix -L, $(LIBRARIES))
 SDL_FLAGS+=$(INCLUDES) $(LIBRARIES)
 	else
@@ -145,7 +146,7 @@ DIRS_B    := $(BIN_DIR) $(BIN_DIR)/logs
 ## DLL files and output location where they will be copied
 DLLS_DIR  := $(EXTERNAL_SDL2_DEP)
 ifeq ($(OS), Windows_NT)
-DLLS_SRC  := $(shell powershell 'Get-ChildItem "*.dll" -Path "$(DLLS_DIR)" -Recurse | Where {$$_.DirectoryName -match "x86_64-w64-mingw32"} | Resolve-Path -Relative')
+DLLS_SRC  := $(shell powershell 'Get-ChildItem "*.dll" -Path "$(DLLS_DIR)" -Recurse | Where {$$_.DirectoryName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
 else
 DLLS_SRC  := $(shell find "$(DLLS_DIR)" -name "*.dll")
 endif
