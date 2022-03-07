@@ -70,9 +70,9 @@ ifeq ($(OS), Windows_NT)
 	ifeq ("$(wildcard $(EXTERNAL_SDL2_DEP))","")
 $(error "Failed to locate expected '$(EXTERNAL_SDL2_DEP)' directory containing SDL2 dependencies!")
 	else
-INCLUDES := $(shell powershell 'Get-ChildItem "include" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
+INCLUDES := $(shell powershell 'Get-ChildItem "include" -Directory -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
 INCLUDES := $(addprefix -I, $(addsuffix \SDL2, $(INCLUDES)))
-LIBRARIES := $(shell powershell 'Get-ChildItem "lib" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
+LIBRARIES := $(shell powershell 'Get-ChildItem "lib" -Directory -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
 LIBRARIES := $(addprefix -L, $(LIBRARIES))
 SDL_FLAGS+=$(INCLUDES) $(LIBRARIES)
 	endif
