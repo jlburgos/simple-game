@@ -67,14 +67,14 @@ SDL_FLAGS=\
 PLATFORM_VERSION = x86_64
 EXTERNAL_SDL2_DEP=../MINGW-SDL2
 ifeq ($(OS), Windows_NT)
-	ifneq ("$(wildcard $(EXTERNAL_SDL2_DEP))","")
+	ifeq ("$(wildcard $(EXTERNAL_SDL2_DEP))","")
+$(error "Failed to locate expected '$(EXTERNAL_SDL2_DEP)' directory containing SDL2 dependencies!")
+	else
 INCLUDES := $(shell powershell 'Get-ChildItem "include" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
 INCLUDES := $(addprefix -I, $(addsuffix \SDL2, $(INCLUDES)))
 LIBRARIES := $(shell powershell 'Get-ChildItem "lib" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
 LIBRARIES := $(addprefix -L, $(LIBRARIES))
 SDL_FLAGS+=$(INCLUDES) $(LIBRARIES)
-	else
-$(error "Failed to locate expected '$(EXTERNAL_SDL2_DEP)' directory containing SDL2 dependencies!")
 	endif
 else
 SDL_FLAGS+=$(shell sdl2-config --cflags)
@@ -144,13 +144,10 @@ WASM_OPTS=\
 DIRS_B    := $(BIN_DIR) $(BIN_DIR)/logs
 
 ## DLL files and output location where they will be copied
-DLLS_DIR  := $(EXTERNAL_SDL2_DEP)
 ifeq ($(OS), Windows_NT)
-DLLS_SRC  := $(shell powershell 'Get-ChildItem "*.dll" -Path "$(DLLS_DIR)" -Recurse | Where {$$_.DirectoryName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
-else
-DLLS_SRC  := $(shell find "$(DLLS_DIR)" -name "*.dll")
-endif
+DLLS_SRC  := $(shell powershell 'Get-ChildItem "*.dll" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.DirectoryName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
 DLLS_O    := $(addprefix $(BIN_DIR)/, $(notdir $(DLLS_SRC)))
+endif
 
 ## Source files and output location of compiled object files
 OBJS_SRC  := $(wildcard src/**/*.cpp src/*.cpp)
@@ -173,7 +170,7 @@ MAKEFLAGS += -j$(NPROCS)
 ifeq ($(OS), Windows_NT)
 BIN_TARGET := $(BIN_DIR)/$(BIN_NAME).exe
 else
-BIN_TARGET := $(BIN_DIR)/$(BIN_NAME)
+BIN_TARGET := $(BIN_DIR)/$(BIN_NAME).bin
 endif
 
 ## Top-level rule to create build directory structure and compile the basic program
