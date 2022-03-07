@@ -213,8 +213,8 @@ ifeq ($(OS),Windows_NT)
 	powershell 'if (Test-Path -Path "$(BIN_DIR)" -PathType Container) { Remove-Item -Path "$(BIN_DIR)" -recurse }'
 	powershell 'if (Test-Path -Path "$(BUILD_DIR)" -PathType Container) { Remove-Item -Path "$(BUILD_DIR)" -recurse }'
 else
-	$(RM) -r '$(BUILD_DIR)'
 	$(RM) -r '$(BIN_DIR)'
+	$(RM) -r '$(BUILD_DIR)'
 endif
 
 ## Set up .PHONY
