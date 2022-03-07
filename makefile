@@ -170,7 +170,7 @@ MAKEFLAGS += -j$(NPROCS)
 ifeq ($(OS), Windows_NT)
 BIN_TARGET := $(BIN_DIR)/$(BIN_NAME).exe
 else
-BIN_TARGET := $(BIN_DIR)/$(BIN_NAME).bin
+BIN_TARGET := $(BIN_DIR)/$(BIN_NAME)
 endif
 
 ## Top-level rule to create build directory structure and compile the basic program
