@@ -41,12 +41,15 @@ BUILD_DIR = build
 
 ## Note: Add the '-mwindows' option to remove the terminal pop-up when double-clicking the game.exe file
 ##       https://gcc.gnu.org/onlinedocs/gcc/x86-Windows-Options.html
-#WINDOWS_FLAGS=-mwindows
+WINDOWS_RELEASE_FLAGS=-mwindows
 
 ## OS Flags
 ## Notes: https://stackoverflow.com/questions/20673370/why-do-we-write-d-reentrant-while-compiling-c-code-using-threads
-OS_SPECIFIC_FLAGS=
-ifneq ($(OS), Windows_NT)
+ifeq ($(OS), Windows_NT)
+OS_SPECIFIC_FLAGS=\
+	-mwin32 \
+	-mthreads
+else
 OS_SPECIFIC_FLAGS=\
 	-pthread
 endif
