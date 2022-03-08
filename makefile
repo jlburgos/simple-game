@@ -164,6 +164,15 @@ endif
 ######################################################################################################
 ######################################################################################################
 
+ifeq ($(OS), Windows_NT)
+WINDRES = windres
+ICO_RC = assets/resources/ico.rc
+ICO_O = build/ico.o
+endif
+
+######################################################################################################
+######################################################################################################
+
 MAKEFLAGS += -j$(NPROCS)
 
 ## Set up final binary name
@@ -172,10 +181,16 @@ BIN_TARGET := $(BIN_DIR)/$(BIN_NAME).exe
 else
 BIN_TARGET := $(BIN_DIR)/$(BIN_NAME)
 endif
+######################################################################################################
+######################################################################################################
 
 ## Top-level rule to create build directory structure and compile the basic program
-$(BIN_TARGET): $(DIRS_O) $(DIRS_B) $(OBJS_O) $(DLLS_O)
-	$(CXX) -o '$@' $(OBJS_O) $(OPTS)
+$(BIN_TARGET): $(DIRS_O) $(DIRS_B) $(ICO_O) $(OBJS_O) $(DLLS_O)
+	$(CXX) -o "$@" $(ICO_O) $(OBJS_O) $(OPTS)
+
+## Set Windows executable thumbnail icon
+$(ICO_O):
+	$(WINDRES) $(ICO_RC) $(ICO_O)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
