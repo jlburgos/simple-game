@@ -32,7 +32,6 @@ int main(void)
         {
             SDL_Log("Initialization completed! Bringing up window now...");
             mgr.start();
-            mgr.close();
 
             SDL_Log("Program completed with status '%d'!", EXIT_SUCCESS);
             rc = EXIT_SUCCESS;
