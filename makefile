@@ -158,10 +158,11 @@ OBJS_O    := $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.o))
 
 ## Object file output directories
 ## Note: 'DIRS_O' is calculated this way to get a unique list of sub-directories whereas doing $(dir $(OBJS_O)) would generate duplicates
+DIRS_O = build/src
 ifeq ($(OS), Windows_NT)
-DIRS_O    := $(addprefix $(BUILD_DIR)/, $(shell powershell 'Get-ChildItem -Path "$(SRC_DIR)" -Directory -Recurse | Resolve-Path -Relative'))
+DIRS_O    += $(addprefix $(BUILD_DIR)/, $(shell powershell 'Get-ChildItem -Path "$(SRC_DIR)" -Directory -Recurse | Resolve-Path -Relative'))
 else
-DIRS_O    := $(addprefix $(BUILD_DIR)/, $(shell find $(SRC_DIR)/* -type d))
+DIRS_O    += $(addprefix $(BUILD_DIR)/, $(shell find $(SRC_DIR)/* -type d))
 endif
 
 ######################################################################################################
@@ -189,12 +190,8 @@ endif
 ######################################################################################################
 
 ## Top-level rule to create build directory structure and compile the basic program
-$(BIN_TARGET): $(DIRS_O) $(DIRS_B) $(ICO_O) $(OBJS_O) $(DLLS_O)
+$(BIN_TARGET): $(DIRS_B) $(OBJS_O) $(ICO_O) $(DLLS_O)
 	$(CXX) -o "$@" $(ICO_O) $(OBJS_O) $(OPTS)
-
-## Set Windows executable thumbnail icon
-$(ICO_O):
-	$(WINDRES) $(ICO_RC) $(ICO_O)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
@@ -205,6 +202,10 @@ ifeq ($(OS), Windows_NT)
 else
 	mkdir -p '$@'
 endif
+
+## Set Windows executable thumbnail icon
+$(ICO_O): $(DIRS_O)
+	$(WINDRES) $(ICO_RC) $(ICO_O)
 
 ## Compile CPP object files
 $(BUILD_DIR)/%.o: %.cpp

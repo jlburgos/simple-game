@@ -15,7 +15,7 @@
 #include <string>
 //#include <memory>
 
-#include "../headers.hpp"
+#include "headers.hpp"
 
 class WindowManager
 {

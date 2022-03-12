@@ -29,9 +29,9 @@
 #define sleep(x) Sleep(1000 * (x))
 #endif
 
-#include "util/path.hpp"
-#include "util/timer.hpp"
-#include "util/logger.hpp"
-#include "manager/window_manager.hpp"
+#include "path.hpp"
+#include "timer.hpp"
+#include "logger.hpp"
+#include "window_manager.hpp"
 
 #endif /* _HEADERS_HPP */

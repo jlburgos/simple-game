@@ -16,26 +16,20 @@ int main(void)
     int rc = EXIT_FAILURE;
     try
     {
+        // Workaround for not using SDL_main() as entrypoint
         SDL_SetMainReady();
 
         // Initialize custom logger
         Logger::init();
 
-        SDL_Log("Initializing window manager...");
         WindowManager mgr;
         rc = mgr.init();
         if (rc != 0)
         {
-            SDL_Log("Failed to initialize program!\n");
+            throw std::runtime_error("Failed to initialize window manager");
         }
-        else
-        {
-            SDL_Log("Initialization completed! Bringing up window now...");
-            mgr.start();
-
-            SDL_Log("Program completed with status '%d'!", EXIT_SUCCESS);
-            rc = EXIT_SUCCESS;
-        }
+        mgr.start();
+        rc = EXIT_SUCCESS;
     }
     catch (const PathNS::PathException &ex)
     {
@@ -44,6 +38,10 @@ int main(void)
     catch (const Logger::LoggerException &ex)
     {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Logger Exception: %s", ex.what());
+    }
+    catch (const std::runtime_error &ex)
+    {
+        SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Runtime Error: %s", ex.what());
     }
     catch (const std::exception &ex)
     {

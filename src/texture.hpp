@@ -12,7 +12,7 @@
 #ifndef __TEXTURE_HPP
 #define __TEXTURE_HPP
 
-#include "../headers.hpp"
+#include "headers.hpp"
 
 class Texture
 {
