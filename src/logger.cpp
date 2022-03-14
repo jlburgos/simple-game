@@ -39,7 +39,7 @@ void manage_message_queue()
     while(true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        if(Logger::is_thread_needed() || !Logger::has_messages())
+        if(Logger::is_thread_needed() || Logger::has_messages())
         {
             Logger::write_message_buffers();
         }
