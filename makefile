@@ -54,6 +54,10 @@ OS_SPECIFIC_FLAGS=\
 	-pthread
 endif
 
+## Make sure we compile for 64-bit
+OS_SPECIFIC_FLAGS+=\
+	-m64
+
 ## SDL Flags
 SDL_FLAGS=\
 	-lSDL2main \
