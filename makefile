@@ -259,9 +259,9 @@ endif
 PHONY += clean
 clean:
 ifeq ($(OS),Windows_NT)
-	powershell 'if (Test-Path -Path "$(BIN_DIR)" -PathType Container) { Remove-Item -Path "$(BIN_DIR)" -recurse }'
-	powershell 'if (Test-Path -Path "$(BUILD_DIR)" -PathType Container) { Remove-Item -Path "$(BUILD_DIR)" -recurse }'
-	powershell 'if (Test-Path -Path "$(LOGS_DIR)" -PathType Container) { Remove-Item -Path "$(LOGS_DIR)" -recurse }'
+	powershell 'if (Test-Path -Path "$(BIN_DIR)" -PathType Container) { Remove-Item -Path "$(BIN_DIR)" -Recurse }'
+	powershell 'if (Test-Path -Path "$(BUILD_DIR)" -PathType Container) { Remove-Item -Path "$(BUILD_DIR)" -Recurse }'
+	powershell 'if (Test-Path -Path "$(LOGS_DIR)" -PathType Container) { Remove-Item -Path "$(LOGS_DIR)" -Recurse }'
 else
 	$(RM) -r '$(BIN_DIR)'
 	$(RM) -r '$(BUILD_DIR)'
