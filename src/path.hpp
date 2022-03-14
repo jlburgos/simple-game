@@ -31,6 +31,7 @@ namespace PathNS
     {
         std::string exe_path,
                     exe_path_no_ext,
+                    exe_dir_path,
                     exe_name_no_path,
                     root_path = "";
     }
@@ -38,10 +39,13 @@ namespace PathNS
     std::string get_exe_path();
     std::string get_exe_path_no_ext();
     std::string get_exe_name_no_path();
+    std::string get_exe_dir_path();
+
     std::string get_root_path();
 
     std::string get_bin_path();
     std::string get_bin_logs_path();
+
     std::string get_assets_path();
 }
 

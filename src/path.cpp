@@ -87,6 +87,25 @@ std::string PathNS::get_exe_name_no_path()
     return exe_name_no_path;
 }
 
+std::string PathNS::get_exe_dir_path()
+{
+    if (exe_dir_path.empty())
+    {
+        std::string path = PathNS::get_exe_path();
+        std::size_t pos = path.rfind("/");
+
+        // Remove executable name from path
+        if (pos != std::string::npos)
+        {
+            path.erase(pos);
+        }
+
+        exe_dir_path = path;
+    }
+
+    return exe_dir_path;
+}
+
 std::string PathNS::get_root_path()
 {
     if (root_path.empty())
@@ -95,6 +114,13 @@ std::string PathNS::get_root_path()
         std::size_t pos = path.rfind("/");
 
         // Remove executable name from path
+        if (pos != std::string::npos)
+        {
+            path.erase(pos);
+        }
+
+        // Remove "debug" or "release" directory name from path
+        pos = path.rfind("/");
         if (pos != std::string::npos)
         {
             path.erase(pos);
@@ -120,7 +146,7 @@ std::string PathNS::get_bin_path()
 
 std::string PathNS::get_bin_logs_path()
 {
-    return PathNS::get_root_path() + "/bin/logs";
+    return PathNS::get_root_path() + "/logs";
 }
 
 std::string PathNS::get_assets_path()

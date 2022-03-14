@@ -24,7 +24,9 @@ endif
 BIN_NAME  := $(ROOT_DIR)
 SRC_DIR   = src
 BIN_DIR   = bin
+LOGS_DIR   = logs
 BUILD_DIR = build
+ASSET_DIR = assets
 
 ## Assets
 #RESOURCES  = assets
@@ -102,8 +104,10 @@ WASM_SDL_FLAGS=\
 ## OPTIMIZATION
 ## Note: The "Og" g++ option enables optimizations that do not interfere with debugging
 ##       But "em++" doesn't seem to like it :(
-OPTIMIZATION=-Og
-#OPTIMIZATION=-O2
+OPTIMIZATION_DEBUG=-Og
+OPTIMIZATION_RELEASE=\
+	-O3 \
+	-s
 
 ## Compiler flags to check "almost everything" because g++ doesn't have a "-Weverything-i-want" flag :P
 ## Notes: https://stackoverflow.com/questions/5088460/flags-to-enable-thorough-and-verbose-g-warnings
@@ -147,15 +151,6 @@ WASM_OPTS=\
 ######################################################################################################
 ######################################################################################################
 
-## Bin directory and log directory paths
-DIRS_B    := $(BIN_DIR) $(BIN_DIR)/logs
-
-## DLL files and output location where they will be copied
-ifeq ($(OS), Windows_NT)
-DLLS_SRC  := $(shell powershell 'Get-ChildItem "*.dll" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.DirectoryName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
-DLLS_O    := $(addprefix $(BIN_DIR)/, $(notdir $(DLLS_SRC)))
-endif
-
 ## Source files and output location of compiled object files
 OBJS_SRC  := $(wildcard src/**/*.cpp src/*.cpp)
 OBJS_O    := $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.o))
@@ -165,6 +160,7 @@ OBJS_O    := $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.o))
 DIRS_O = build/src
 ifeq ($(OS), Windows_NT)
 DIRS_O    += $(addprefix $(BUILD_DIR)/, $(shell powershell 'Get-ChildItem -Path "$(SRC_DIR)" -Directory -Recurse | Resolve-Path -Relative'))
+DIRS_O    := $(subst \,/,$(DIRS_O))
 else
 DIRS_O    += $(addprefix $(BUILD_DIR)/, $(shell find $(SRC_DIR)/* -type d))
 endif
@@ -174,8 +170,11 @@ endif
 
 ifeq ($(OS), Windows_NT)
 WINDRES = windres
-ICO_RC = assets/resources/ico.rc
-ICO_O = build/ico.o
+ICO_RC  := $(shell powershell 'Get-ChildItem -Path "$(ASSET_DIR)" -Filter "ico.rc" -Recurse | Resolve-Path -Relative')
+ICO_RC  := $(subst \,/,$(ICO_RC))
+ICO_O   := $(addprefix $(BUILD_DIR)/,$(subst .rc,.o,$(ICO_RC)))
+ICO_DIR := $(dir $(ICO_O))
+DIRS_O  += $(ICO_DIR)
 endif
 
 ######################################################################################################
@@ -185,22 +184,44 @@ MAKEFLAGS += -j$(NPROCS)
 
 ## Set up final binary name
 ifeq ($(OS), Windows_NT)
-BIN_TARGET := $(BIN_DIR)/$(BIN_NAME).exe
-else
-BIN_TARGET := $(BIN_DIR)/$(BIN_NAME)
+BIN_NAME := $(BIN_NAME).exe
+endif
+
+## Set up final targets
+BIN_DEBUG   := $(BIN_DIR)/debug/$(BIN_NAME)
+BIN_RELEASE := $(BIN_DIR)/release/$(BIN_NAME)
+
+
+## Bin directory and log directory paths
+DIRS_BIN_DEBUG   := $(dir $(BIN_DEBUG))
+DIRS_BIN_RELEASE := $(dir $(BIN_RELEASE))
+
+## DLL files and output location where they will be copied
+ifeq ($(OS), Windows_NT)
+DLLS_SRC  := $(shell powershell 'Get-ChildItem "*.dll" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.DirectoryName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
+DLLS_SRC  := $(subst \,/,$(DLLS_SRC))
+DLLS_DEBUG   := $(addprefix $(dir $(BIN_DEBUG))/, $(notdir $(DLLS_SRC)))
+DLLS_RELEASE := $(addprefix $(dir $(BIN_RELEASE))/, $(notdir $(DLLS_SRC)))
 endif
 
 ######################################################################################################
 ######################################################################################################
 
-## Top-level rule to create build directory structure and compile the basic program
-$(BIN_TARGET): $(DIRS_B) $(OBJS_O) $(ICO_O) $(DLLS_O)
-	$(CXX) -o "$@" $(ICO_O) $(OBJS_O) $(OPTS)
+debug: $(BIN_DEBUG)
+release: $(BIN_RELEASE)
+all: $(BIN_DEBUG) $(BIN_RELEASE)
+
+
+## Compile final binary
+$(BIN_DEBUG): $(LOGS_DIR) $(DIRS_O) $(DIRS_BIN_DEBUG) $(DLLS_DEBUG) $(OBJS_O) $(ICO_O)
+	$(CXX) -o "$@" $(OBJS_O) $(ICO_O) $(OPTS)
+$(BIN_RELEASE): $(LOGS_DIR) $(DIRS_O) $(DIRS_BIN_RELEASE) $(DLLS_RELEASE) $(OBJS_O) $(ICO_O)
+	$(CXX) -o "$@" $(OBJS_O) $(ICO_O) $(OPTS)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
 ##       returns a large string that we want to ignore.
-$(DIRS_O) $(DIRS_B):
+$(LOGS_DIR) $(DIRS_O) $(DIRS_BIN_DEBUG) $(DIRS_BIN_RELEASE):
 ifeq ($(OS), Windows_NT)
 	powershell 'if (-not (Test-Path -Path "$@" -PathType Container)) { $$output_sink = New-Item -Path "$@" -ItemType Directory }'
 else
@@ -208,7 +229,7 @@ else
 endif
 
 ## Set Windows executable thumbnail icon
-$(ICO_O): $(DIRS_O)
+$(ICO_O): $(ICO_DIR)
 	$(WINDRES) $(ICO_RC) $(ICO_O)
 
 ## Compile CPP object files
@@ -216,9 +237,13 @@ $(BUILD_DIR)/%.o: %.cpp
 	$(CXX) -c -o '$@' '$<' $(OPTS)
 
 ## Copy all the DLLs for Windows build
-$(DLLS_O):
+$(DLLS_DEBUG):
 ifeq ($(OS), Windows_NT)
-	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(BIN_DIR)"'))
+	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_DEBUG))"'))
+endif
+$(DLLS_RELEASE):
+ifeq ($(OS), Windows_NT)
+	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_RELEASE))"'))
 endif
 
 ## Compile web-assembly version using docker container
@@ -236,9 +261,11 @@ clean:
 ifeq ($(OS),Windows_NT)
 	powershell 'if (Test-Path -Path "$(BIN_DIR)" -PathType Container) { Remove-Item -Path "$(BIN_DIR)" -recurse }'
 	powershell 'if (Test-Path -Path "$(BUILD_DIR)" -PathType Container) { Remove-Item -Path "$(BUILD_DIR)" -recurse }'
+	powershell 'if (Test-Path -Path "$(LOGS_DIR)" -PathType Container) { Remove-Item -Path "$(LOGS_DIR)" -recurse }'
 else
 	$(RM) -r '$(BIN_DIR)'
 	$(RM) -r '$(BUILD_DIR)'
+	$(RM) -r '$(LOGS_DIR)'
 endif
 
 ## Set up .PHONY
