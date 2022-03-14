@@ -68,7 +68,7 @@ SDL_FLAGS=\
 	-lSDL2_ttf
 
 ## If manually set up SDL includes (.h files) and SDL libraries (.a & .la files), we grab those for windows
-## Else for linux we get the flags from `sdl2-config --cflags`
+## Else for linux we get the flags from `pkg-config` (using `sdl-config` also works)
 ## Note: Grabbing 'release' builds from https://github.com/libsdl-org
 ## ** https://github.com/libsdl-org/SDL/releases
 ## ** https://github.com/libsdl-org/SDL_image/releases
@@ -86,7 +86,7 @@ LIBRARIES := $(subst \,/,$(addprefix -L, $(LIBRARIES)))
 SDL_FLAGS+=$(INCLUDES) $(LIBRARIES)
 	endif
 else
-SDL_FLAGS+=$(shell sdl2-config --cflags)
+SDL_FLAGS+=$(shell pkg-config --cflags --libs sdl2)
 endif
 
 WASM_SDL_FLAGS=\
@@ -102,9 +102,9 @@ WASM_SDL_FLAGS=\
 	--bind
 
 ## OPTIMIZATION
-## Note: The "Og" g++ option enables optimizations that do not interfere with debugging
-##       But "em++" doesn't seem to like it :(
-OPTIMIZATION_DEBUG=-Og
+OPTIMIZATION_DEBUG=\
+	-O0 \
+	-g
 OPTIMIZATION_RELEASE=\
 	-O3 \
 	-s
@@ -135,16 +135,14 @@ CXX_COMPILER_FLAGS=\
 
 ## Aggregated compiler flags
 OPTS=\
-	$(OPTIMIZATION) \
-	$(OS_SPECIFIC_FLAGS) \
 	$(CXX_STD) \
+	$(OS_SPECIFIC_FLAGS) \
 	$(SDL_FLAGS) \
 	$(CXX_COMPILER_FLAGS)
 
 WASM_OPTS=\
-	$(OPTIMIZATION) \
-	$(OS_SPECIFIC_FLAGS) \
 	$(CXX_STD) \
+	$(OS_SPECIFIC_FLAGS) \
 	$(WASM_SDL_FLAGS) \
 	$(CXX_COMPILER_FLAGS)
 
@@ -152,8 +150,10 @@ WASM_OPTS=\
 ######################################################################################################
 
 ## Source files and output location of compiled object files
+## Note: OBJS_O_DEBUG and OBJS_O_RELEASE are used for matching object file build targets
 OBJS_SRC  := $(wildcard src/**/*.cpp src/*.cpp)
-OBJS_O    := $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.o))
+OBJS_O_DEBUG    := $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.debug.o))
+OBJS_O_RELEASE  := $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.release.o))
 
 ## Object file output directories
 ## Note: 'DIRS_O' is calculated this way to get a unique list of sub-directories whereas doing $(dir $(OBJS_O)) would generate duplicates
@@ -182,15 +182,17 @@ endif
 
 MAKEFLAGS += -j$(NPROCS)
 
+## Set up final targets
+## Note: https://semver.org/
+BUILD_VERSION ?= 0.0.0
+BIN_DEBUG   := $(BIN_DIR)/debug/$(BIN_NAME)-$(BUILD_VERSION)-debug
+BIN_RELEASE := $(BIN_DIR)/release/$(BIN_NAME)-$(BUILD_VERSION)-release
+
 ## Set up final binary name
 ifeq ($(OS), Windows_NT)
-BIN_NAME := $(BIN_NAME).exe
+BIN_DEBUG   := $(BIN_DEBUG).exe
+BIN_RELEASE := $(BIN_RELEASE).exe
 endif
-
-## Set up final targets
-BIN_DEBUG   := $(BIN_DIR)/debug/$(BIN_NAME)
-BIN_RELEASE := $(BIN_DIR)/release/$(BIN_NAME)
-
 
 ## Bin directory and log directory paths
 DIRS_BIN_DEBUG   := $(dir $(BIN_DEBUG))
@@ -200,23 +202,29 @@ DIRS_BIN_RELEASE := $(dir $(BIN_RELEASE))
 ifeq ($(OS), Windows_NT)
 DLLS_SRC  := $(shell powershell 'Get-ChildItem "*.dll" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.DirectoryName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
 DLLS_SRC  := $(subst \,/,$(DLLS_SRC))
-DLLS_DEBUG   := $(addprefix $(dir $(BIN_DEBUG))/, $(notdir $(DLLS_SRC)))
-DLLS_RELEASE := $(addprefix $(dir $(BIN_RELEASE))/, $(notdir $(DLLS_SRC)))
+DLLS_DEBUG   := $(addprefix $(DIRS_BIN_DEBUG)/, $(notdir $(DLLS_SRC)))
+DLLS_RELEASE := $(addprefix $(DIRS_BIN_RELEASE)/, $(notdir $(DLLS_SRC)))
 endif
 
 ######################################################################################################
 ######################################################################################################
 
+## User provided targets
 debug: $(BIN_DEBUG)
 release: $(BIN_RELEASE)
 all: $(BIN_DEBUG) $(BIN_RELEASE)
 
-
 ## Compile final binary
-$(BIN_DEBUG): $(LOGS_DIR) $(DIRS_O) $(DIRS_BIN_DEBUG) $(DLLS_DEBUG) $(OBJS_O) $(ICO_O)
-	$(CXX) -o "$@" $(OBJS_O) $(ICO_O) $(OPTS)
-$(BIN_RELEASE): $(LOGS_DIR) $(DIRS_O) $(DIRS_BIN_RELEASE) $(DLLS_RELEASE) $(OBJS_O) $(ICO_O)
-	$(CXX) -o "$@" $(OBJS_O) $(ICO_O) $(OPTS)
+$(BIN_DEBUG): $(LOGS_DIR) $(DIRS_O) $(DLLS_DEBUG) $(OBJS_O_DEBUG) $(ICO_O)
+	$(info ------------------------------------------------------)
+	$(info Building final executable $(BIN_DEBUG) ...)
+	$(info ------------------------------------------------------)
+	$(CXX) -o "$@" $(OBJS_O_DEBUG) $(ICO_O) $(OPTIMIZATION_DEBUG) $(OPTS)
+$(BIN_RELEASE): $(LOGS_DIR) $(DIRS_O) $(DLLS_RELEASE) $(OBJS_O_RELEASE) $(ICO_O)
+	$(info ------------------------------------------------------)
+	$(info Building final executable $(BIN_RELEASE) ...)
+	$(info ------------------------------------------------------)
+	$(CXX) -o "$@" $(OBJS_O_RELEASE) $(ICO_O) $(OPTIMIZATION_RELEASE) $(OPTS)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
@@ -233,15 +241,17 @@ $(ICO_O): $(ICO_DIR)
 	$(WINDRES) $(ICO_RC) $(ICO_O)
 
 ## Compile CPP object files
-$(BUILD_DIR)/%.o: %.cpp
-	$(CXX) -c -o '$@' '$<' $(OPTS)
+$(BUILD_DIR)/%.debug.o: %.cpp
+	$(CXX) -c -o '$@' '$<' $(OPTIMIZATION_DEBUG) $(OPTS)
+$(BUILD_DIR)/%.release.o: %.cpp
+	$(CXX) -c -o '$@' '$<' $(OPTIMIZATION_RELEASE) $(OPTS)
 
 ## Copy all the DLLs for Windows build
-$(DLLS_DEBUG):
+$(DLLS_DEBUG): $(DIRS_BIN_DEBUG)
 ifeq ($(OS), Windows_NT)
 	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_DEBUG))"'))
 endif
-$(DLLS_RELEASE):
+$(DLLS_RELEASE): $(DIRS_BIN_RELEASE)
 ifeq ($(OS), Windows_NT)
 	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_RELEASE))"'))
 endif
