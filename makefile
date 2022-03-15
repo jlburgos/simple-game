@@ -209,7 +209,7 @@ endif
 
 MAKEFLAGS += -j$(NPROCS)
 
-## User provided targets
+## User targets
 debug: $(BIN_DEBUG)
 release: $(BIN_RELEASE)
 all: $(BIN_DEBUG) $(BIN_RELEASE)
@@ -219,12 +219,12 @@ $(BIN_DEBUG): $(LOGS_DIR) $(DIRS_O) $(DLLS_DEBUG) $(OBJS_O_DEBUG) $(ICO_O)
 	$(info ------------------------------------------------------)
 	$(info Building final executable $(BIN_DEBUG) ...)
 	$(info ------------------------------------------------------)
-	$(CXX) -o "$@" $(OBJS_O_DEBUG) $(ICO_O) $(OPTIMIZATION_DEBUG) $(OPTS)
+	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_DEBUG) $(OPTIMIZATION_DEBUG) $(OPTS)
 $(BIN_RELEASE): $(LOGS_DIR) $(DIRS_O) $(DLLS_RELEASE) $(OBJS_O_RELEASE) $(ICO_O)
 	$(info ------------------------------------------------------)
 	$(info Building final executable $(BIN_RELEASE) ...)
 	$(info ------------------------------------------------------)
-	$(CXX) -o "$@" $(OBJS_O_RELEASE) $(ICO_O) $(OPTIMIZATION_RELEASE) $(OPTS)
+	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_RELEASE) $(OPTIMIZATION_RELEASE) $(OPTS)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
