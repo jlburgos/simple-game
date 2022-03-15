@@ -1,6 +1,15 @@
 # Ignore self
 #.gitignore
 
+# Ignore Visual Studio Community output directory
+x64
+
+# Ignore Visual Studio Code config directory
+.vs
+
+# Ignore logs directory
+logs
+
 # Ignore bin dir
 bin
 
