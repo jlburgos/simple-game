@@ -82,7 +82,7 @@ void WindowManager::start()
     //SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xFF, 0xFF, 0xFF));
     SDL_Event e;
     bool quit = false;
-    uint8_t color = 0x0;
+    //uint8_t color = 0x0;
     Entity entity = entities[0];
     Entity background = entities[1];
     const uint8_t* key_states = SDL_GetKeyboardState(nullptr);
