@@ -1,2 +1,3 @@
 // Resource file used to set up windows executable icon
-1 ICON "favicon.ico"
+//1 ICON "favicon.ico"
+1 ICON "blocky.ico"

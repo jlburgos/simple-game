@@ -5,6 +5,11 @@
     exit 1
 }
 
+[ -z "${2}" ] && {
+    echo "Missing ICO file argument!"
+    exit 1
+}
+
 convert -verbose \
         -resize x16 \
         -gravity center \
@@ -12,4 +17,4 @@ convert -verbose \
         -flatten \
         -colors 256 \
         -background transparent \
-        "${1}" favicon.ico
+        "${1}" "${2}"
