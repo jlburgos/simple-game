@@ -48,7 +48,10 @@ std::string PathNS::get_exe_path()
         std::string path(buffer);
         for (std::size_t i = 0; i < path.length(); ++i)
         {
-            path[i] == '\\' ? path[i] = '/' : path[i];
+            if (path[i] == '\\')
+            {
+                path[i] = '/';
+            }
         }
         exe_path = path;
     }
