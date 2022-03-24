@@ -24,7 +24,7 @@ endif
 BIN_NAME  := $(ROOT_DIR)
 SRC_DIR   = src
 BIN_DIR   = bin
-LOGS_DIR   = logs
+LOGS_DIR  = logs
 BUILD_DIR = build
 ASSET_DIR = assets
 
@@ -159,10 +159,10 @@ OBJS_O_RELEASE  := $(addprefix $(BUILD_DIR)/, $(OBJS_SRC:%.cpp=%.release.o))
 ## Note: 'DIRS_O' is calculated this way to get a unique list of sub-directories whereas doing $(dir $(OBJS_O)) would generate duplicates
 DIRS_O = build/src
 ifeq ($(OS), Windows_NT)
-DIRS_O    += $(addprefix $(BUILD_DIR)/, $(shell powershell 'Get-ChildItem -Path "$(SRC_DIR)" -Directory -Recurse | Resolve-Path -Relative'))
+DIRS_O    += $(addprefix $(BUILD_DIR)/src, $(shell powershell 'Get-ChildItem -Path "$(SRC_DIR)" -Directory -Recurse | Resolve-Path -Relative'))
 DIRS_O    := $(subst \,/,$(DIRS_O))
 else
-DIRS_O    += $(addprefix $(BUILD_DIR)/, $(shell find $(SRC_DIR)/* -type d))
+DIRS_O    += $(addprefix $(BUILD_DIR)/src, $(shell find $(SRC_DIR)/* -type d))
 endif
 
 ######################################################################################################
