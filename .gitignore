@@ -1,6 +1,9 @@
 # Ignore self
 #.gitignore
 
+# Ignore tokens
+.gittoken
+
 # Ignore Visual Studio Community output directory
 x64
 
