@@ -49,11 +49,13 @@ int WindowManager::init()
         return 1;
     }
 
+/*
     SDL_FillRect(screen_surface.get(), nullptr, SDL_MapRGB(screen_surface.get()->format, 0xaf, 0xaf, 0xff));
     SDL_UpdateWindowSurface(screen_window.get());
     SDL_Log("Showing a white screen...");
     SDL_Delay(2000);
     SDL_Log("Switching to a blue screen...");
+*/
     
     Entity entity;
     if(!entity.set_entity(renderer, PathNS::get_assets_path() + "/test-imgs/blocky-sprite.png"))
