@@ -11,8 +11,8 @@
 
 #include "message_queue.hpp"
 
-MessageQueue::MessageQueue() {}
-MessageQueue::~MessageQueue() {}
+MessageQueue::MessageQueue() = default;
+MessageQueue::~MessageQueue() = default;
 
 bool MessageQueue::empty() const
 {
