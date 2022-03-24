@@ -16,97 +16,61 @@
 #include "path.hpp"
 #include "logger.hpp"
 
-// Define static members
-const std::string WindowManager::DEFAULT_SCREEN_TITLE = "Game Window";
-const int WindowManager::DEFAULT_SCREEN_WIDTH = 720;
-const int WindowManager::DEFAULT_SCREEN_HEIGHT = 480;
-SDL_Window *WindowManager::window = nullptr;
-SDL_Renderer *WindowManager::renderer = nullptr;
-SDL_Surface *WindowManager::surface_apple = nullptr;
-SDL_Surface *WindowManager::surface_plant = nullptr;
-SDL_Texture *WindowManager::texture_apple = nullptr;
-SDL_Texture *WindowManager::texture_plant = nullptr;
-
-WindowManager::WindowManager()
-{
-    // Nothing to do
-}
-
-WindowManager::~WindowManager()
-{
-    this->close();
-}
-
 int WindowManager::init()
 {
-    // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    // Initialize screen window
+    screen_window = unique_window_ptr(
+        SDL_CreateWindow(
+            DEFAULT_SCREEN_TITLE,
+            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+            DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
+            SDL_WINDOW_SHOWN
+        )
+    );
+    if (screen_window == nullptr)
     {
-        SDL_Log("Failed to initialize SDL support: %s", SDL_GetError());
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to create SDL_Window: %s", SDL_GetError());
         return 1;
     }
-    if (IMG_Init(IMG_INIT_PNG) == 0)
-    {
-        SDL_Log("Failed to initialize SDL Image support: %s", IMG_GetError());
-        return 1;
-    }
-    // Create window
-    window = SDL_CreateWindow(DEFAULT_SCREEN_TITLE.c_str(),
-                                SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
-                                SDL_WINDOW_SHOWN);
-    if (window == nullptr)
-    {
-        SDL_Log("Failed to create SDL_Window: %s", SDL_GetError());
-        return 1;
-    }
-    // Get window surface
-    //surface = SDL_GetWindowSurface(this->window);
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    // Create temporary window surface
+    auto screen_surface = unique_surface_ptr(SDL_GetWindowSurface(screen_window.get()));
+    if (screen_surface == nullptr)
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to create SDL_Surface: %s", SDL_GetError());
+        return 1;
+    }
+
+    // Set window surface in renderer
+    renderer = unique_renderer_ptr(SDL_CreateRenderer(screen_window.get(), -1, SDL_RENDERER_ACCELERATED));
     if(renderer == nullptr)
     {
         SDL_Log("Failed to create SDL_Renderer: %s", SDL_GetError());
         return 1;
     }
 
-    //rw_apple = SDL_RWFromConstMem(APPLE_PNG, static_cast<int>(APPLE_PNG_LEN));
-    //surface_apple = IMG_LoadPNG_RW(rw_apple);
-
-    std::string path = PathNS::get_assets_path() + "/test-imgs/apple.png";
-    surface_apple = IMG_Load(path.c_str());
-    if(surface_apple == nullptr)
+    SDL_FillRect(screen_surface.get(), nullptr, SDL_MapRGB(screen_surface.get()->format, 0xaf, 0xaf, 0xff));
+    SDL_UpdateWindowSurface(screen_window.get());
+    SDL_Log("Showing a white screen...");
+    SDL_Delay(2000);
+    SDL_Log("Switching to a blue screen...");
+    
+    Entity entity;
+    if(!entity.set_entity(renderer, PathNS::get_assets_path() + "/test-imgs/blocky-sprite.png"))
     {
-        SDL_Log("Failed to create apple surface: %s", IMG_GetError());
+        SDL_Log("Failed to set entity");
         return 1;
     }
 
-    //rw_plant = SDL_RWFromConstMem(PLANT_JPEG, static_cast<int>(PLANT_JPEG_LEN));
-    //surface_plant = IMG_LoadJPG_RW(rw_plant);
-    path = PathNS::get_assets_path() + "/test-imgs/plant.jpeg";
-    surface_plant = IMG_Load(path.c_str());
-    if(surface_plant == nullptr)
+    Entity background;
+    if (!background.set_background(renderer, PathNS::get_assets_path() + "/test-imgs/test-background.png"))
     {
-        SDL_Log("Failed to create plant surface: %s", IMG_GetError());
+        SDL_Log("Failed to set background");
         return 1;
     }
 
-    texture_apple = SDL_CreateTextureFromSurface(renderer, surface_apple);
-    if(texture_apple == nullptr)
-    {
-        SDL_Log("Failed to create apple texture: %s", SDL_GetError());
-        return 1;
-    }
-
-    texture_plant = SDL_CreateTextureFromSurface(renderer, surface_plant);
-    if(texture_plant == nullptr)
-    {
-        SDL_Log("Failed to create plant texture: %s", SDL_GetError());
-        return 1;
-    }
-
-    IMG_Quit();
-
+    entities.push_back(entity);
+    entities.push_back(background);
     return 0;
 }
 
@@ -114,46 +78,110 @@ void WindowManager::start()
 {
     // Fill the surface white
     //SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xFF, 0xFF, 0xFF));
-    while(true)
+    SDL_Event e;
+    bool quit = false;
+    uint8_t color = 0x0;
+    Entity entity = entities[0];
+    Entity background = entities[1];
+    const uint8_t* key_states = SDL_GetKeyboardState(nullptr);
+    const uint8_t* up = &key_states[SDL_SCANCODE_UP];
+    const uint8_t* down = &key_states[SDL_SCANCODE_DOWN];
+    const uint8_t* left = &key_states[SDL_SCANCODE_LEFT];
+    const uint8_t* right = &key_states[SDL_SCANCODE_RIGHT];
+
+    uint8_t alpha = 0;
+    bool add = true;
+    while(!quit)
     {
-        SDL_Event e;
-        if(SDL_WaitEvent(&e))
+        while (SDL_PollEvent(&e) != 0)
         {
-            if(e.type == SDL_QUIT)
+            if (e.type == SDL_QUIT)
             {
-                break;
+                SDL_Log("Breaking from loop!");
+                quit = true;
             }
+            /*if (e.type == SDL_KEYUP || e.type == SDL_KEYDOWN)
+            {
+                up    = key_states[SDL_SCANCODE_UP];
+                down  = key_states[SDL_SCANCODE_DOWN];
+                left  = key_states[SDL_SCANCODE_LEFT];
+                right = key_states[SDL_SCANCODE_RIGHT];
+            }*/
+            /*if (e.type == SDL_KEYUP)
+            {
+                if (!key_states[SDL_SCANCODE_UP])
+                {
+                    up = 0;
+                    SDL_Log("UNPressed UP");
+                    SDL_Log("keystate: %d", key_states[SDL_SCANCODE_UP]);
+                }
+                if (!)
+                {
+                    down = 0;
+                    SDL_Log("UNPressed DOWN");
+                }
+                if (!)
+                {
+                    left = 0;
+                    SDL_Log("UNPressed LEFT");
+                }
+                if (!)
+                {
+                    right = 0;
+                    SDL_Log("Pressed RIGHT");
+                }
+            }
+            if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
+            {
+                if (key_states[SDL_SCANCODE_UP])
+                {
+                    up = 1;
+                    SDL_Log("Pressed UP");
+                    SDL_Log("keystate: %d", key_states[SDL_SCANCODE_UP]);
+                }
+                if (key_states[SDL_SCANCODE_DOWN])
+                {
+                    down = 1;
+                    SDL_Log("Pressed DOWN");
+                }
+                if (key_states[SDL_SCANCODE_LEFT])
+                {
+                    left = 1;
+                    SDL_Log("Pressed LEFT");
+                }
+                if (key_states[SDL_SCANCODE_RIGHT])
+                {
+                    right = 1;
+                    SDL_Log("Pressed RIGHT");
+                }
+            }*/
         }
-        SDL_Log("Before rendering anything, wait a bit...");
-        SDL_Delay(1E3);
-        SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
-        SDL_Log("Let us initialize renderer color...");
-        SDL_Delay(1E3);
+        if (*up)     entity.move(0, -10);
+        if (*down)   entity.move(0, 10);
+        if (*left)   entity.move(-10, 0);
+        if (*right)  entity.move(10, 0);
+        //entity.show();
 
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture_plant, NULL, NULL);
-        SDL_RenderPresent(renderer);
+        //SDL_SetRenderDrawColor(renderer.get(), 0x0, 0x0, color, 0xff);
+        //color += 1;
 
-        SDL_Log("Render plant");
-        SDL_Delay(1E3);
+        if (alpha == 255)
+            add = false;
+        else if (alpha == 0)
+            add = true;
 
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture_apple, NULL, NULL);
-        SDL_RenderPresent(renderer);
+        if (add)
+            alpha += 5;
+        else
+            alpha -= 5;
+        SDL_SetTextureAlphaMod(entity.get_texture().get(), alpha);
 
-        SDL_Log("Render apple");
-        SDL_Delay(1E3);
+        SDL_RenderClear(renderer.get());
+        background.render_background();
+        entity.render_entity();
+        SDL_RenderPresent(renderer.get());
 
-        break; // Avoid infinite loop for now
+        SDL_Delay(10);
     }
 }
 
-void WindowManager::close()
-{
-    // Quit SDL subsystems
-    SDL_DestroyTexture(texture_apple);
-    SDL_DestroyTexture(texture_plant);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-}

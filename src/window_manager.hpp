@@ -1,43 +1,41 @@
 #ifndef _MY_WINDOW_MANAGER_HPP
 #define _MY_WINDOW_MANAGER_HPP
 
-/**
- * @file window_manager.hpp
- * @author Juan Burgos
- * @brief
- * @version 0.1
- * @date 2021-11-11
- *
- * @copyright Copyright (c) 2021
- *
- */
-
 #include <string>
-//#include <memory>
+#include <memory>
 
 #include "headers.hpp"
+#include "custom_sdl_wrapper.hpp"
+#include "entity.hpp"
 
 class WindowManager
 {
 private:
-    static const std::string DEFAULT_SCREEN_TITLE;
-    static const int DEFAULT_SCREEN_WIDTH;
-    static const int DEFAULT_SCREEN_HEIGHT;
-    // std::unique_ptr<SDL_Window> window;
-    // std::unique_ptr<SDL_Surface> surface;
-    static SDL_Window *window;
-    static SDL_Renderer *renderer;
-    static SDL_Surface *surface_apple;
-    static SDL_Surface *surface_plant;
-    static SDL_Texture *texture_apple;
-    static SDL_Texture *texture_plant;
+    const char* DEFAULT_SCREEN_TITLE = "Game Window";
+    const int DEFAULT_SCREEN_WIDTH = 720;
+    const int DEFAULT_SCREEN_HEIGHT = 480;
+
+    unique_window_ptr screen_window = nullptr;
+    //unique_surface_ptr screen_surface = nullptr;
+    shared_renderer_ptr renderer = nullptr;
+
+    std::vector<Entity> entities;
 
 public:
-    WindowManager();
-    ~WindowManager();
-    static int init();
-    static void start();
-    static void close();
+    WindowManager() = default;
+    ~WindowManager() = default;
+
+    int init();
+    void start();
+
+    class WindowManagerException : public std::runtime_error
+    {
+    public:
+        WindowManagerException(const char* msg) : std::runtime_error(msg)
+        {
+            // Nothing to do
+        }
+    };
 };
 
 #endif /* _WINDOW_MANAGER_HPP */

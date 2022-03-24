@@ -11,13 +11,23 @@
 
 #include "headers.hpp"
 
-int main(void)
+int main(int argc, char* argv[])
 {
+    (void)argc;
+    (void)argv;
+
     int rc = EXIT_FAILURE;
     try
     {
         // Workaround for not using SDL_main() as entrypoint
         SDL_SetMainReady();
+
+        // Initialize SDL
+        if (!Custom_SDL_Wrapper::init())
+        {
+            throw std::runtime_error("Ending program due to previous error!");
+        }
+        std::atexit(Custom_SDL_Wrapper::unload);
 
         // Initialize custom logger
         Logger::init();
@@ -26,8 +36,10 @@ int main(void)
         rc = mgr.init();
         if (rc != 0)
         {
+            SDL_Log("Failed to initialize WindowManager");
             throw std::runtime_error("Failed to initialize window manager");
         }
+        SDL_Log("Successfully initialized WindowManager");
         mgr.start();
         rc = EXIT_SUCCESS;
     }
@@ -51,6 +63,8 @@ int main(void)
     {
         SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Unknown Exception Occurred");
     }
+
+    SDL_Log("Closing program!");
 
     return rc;
 }
