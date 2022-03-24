@@ -91,7 +91,7 @@ void WindowManager::start()
     const uint8_t* left = &key_states[SDL_SCANCODE_LEFT];
     const uint8_t* right = &key_states[SDL_SCANCODE_RIGHT];
 
-    uint8_t alpha = 0;
+    int alpha = 0;
     bool add = true;
     while(!quit)
     {
@@ -173,10 +173,10 @@ void WindowManager::start()
             add = true;
 
         if (add)
-            alpha += 5;
+            alpha = alpha + 5;
         else
-            alpha -= 5;
-        SDL_SetTextureAlphaMod(entity.get_texture().get(), alpha);
+            alpha = alpha - 5;
+        SDL_SetTextureAlphaMod(entity.get_texture().get(), static_cast<uint8_t>(alpha));
 
         SDL_RenderClear(renderer.get());
         background.render_background();
