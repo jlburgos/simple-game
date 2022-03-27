@@ -36,10 +36,8 @@ int main(int argc, char* argv[])
         rc = mgr.init();
         if (rc != 0)
         {
-            SDL_Log("Failed to initialize WindowManager");
             throw std::runtime_error("Failed to initialize window manager");
         }
-        SDL_Log("Successfully initialized WindowManager");
         mgr.start();
         rc = EXIT_SUCCESS;
     }

@@ -2,6 +2,24 @@
 
 #include "entity.hpp"
 
+Entity::Entity(const Entity &entity)
+{
+    texture = entity.get_texture();
+    renderer = entity.get_renderer();
+    spriteSrcInTexture = entity.get_src_texture();
+    spriteDstOnSurface = entity.get_dst_texture();
+}
+
+SDL_Rect Entity::get_src_texture() const
+{
+    return spriteSrcInTexture;
+}
+
+SDL_Rect Entity::get_dst_texture() const
+{
+    return spriteDstOnSurface;
+}
+
 bool Entity::set_entity(shared_renderer_ptr _renderer, const std::string &path)
 {
     renderer = _renderer;
@@ -14,7 +32,7 @@ bool Entity::set_entity(shared_renderer_ptr _renderer, const std::string &path)
     }
     // TODO :: Replace with another mechanism
     spriteSrcInTexture = { 0, 0, 21, 16 };
-    spriteDstOnSurface = { 0, 0, spriteSrcInTexture.w * 10, spriteSrcInTexture.h * 10 };
+    spriteDstOnSurface = { 720 / 2, 480 / 2, spriteSrcInTexture.w * 10, spriteSrcInTexture.h * 10 };
 
     SDL_Log("srcR: %d,%d", spriteSrcInTexture.w, spriteSrcInTexture.h);
     SDL_Log("dstR: %d,%d", spriteDstOnSurface.w, spriteDstOnSurface.h);
@@ -41,12 +59,12 @@ bool Entity::set_entity(shared_renderer_ptr _renderer, const std::string &path)
     if (SDL_BlitScaled(surface.get(), nullptr, scaled_surface.get(), nullptr) < 0)
     {
         SDL_Log("Failed to scale surface: %s", SDL_GetError());
-        texture = unique_texture_ptr(SDL_CreateTextureFromSurface(renderer.get(), surface.get()));
+        texture = mk_shared_texture_ptr(SDL_CreateTextureFromSurface(renderer.get(), surface.get()));
     }
     else
     {
         SDL_Log("Scaling surface by 10X ...");
-        texture = unique_texture_ptr(SDL_CreateTextureFromSurface(renderer.get(), scaled_surface.get()));
+        texture = mk_shared_texture_ptr(SDL_CreateTextureFromSurface(renderer.get(), scaled_surface.get()));
     }
 
     // Note: Loading PNG causes "libpng warning: iCCP: known incorrect sRGB profile"
@@ -58,13 +76,6 @@ bool Entity::set_entity(shared_renderer_ptr _renderer, const std::string &path)
         return false;
     }
 
-    
-
-    spriteDstOnSurface.x = 720 / 2;
-    spriteDstOnSurface.y = 480 / 2;
-    //dstR.w = 16;
-    //dstR.h = 16;
-
     return true;
 }
 
@@ -74,8 +85,8 @@ bool Entity::set_background(shared_renderer_ptr _renderer, const std::string& pa
 
     // Note: Loading PNG causes "libpng warning: iCCP: known incorrect sRGB profile"
     // https://stackoverflow.com/questions/22745076/libpng-warning-iccp-known-incorrect-srgb-profile
-    texture = unique_texture_ptr(IMG_LoadTexture(renderer.get(), path.c_str()));
-    if (texture == nullptr)
+    texture = mk_shared_texture_ptr(IMG_LoadTexture(renderer.get(), path.c_str()));
+    if (texture.get() == nullptr)
     {
         SDL_Log("Failed to create SDL Texture: %s", SDL_GetError());
         return false;

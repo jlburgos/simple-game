@@ -15,8 +15,8 @@ private:
     const int DEFAULT_SCREEN_WIDTH = 720;
     const int DEFAULT_SCREEN_HEIGHT = 480;
 
-    unique_window_ptr screen_window = nullptr;
-    //unique_surface_ptr screen_surface = nullptr;
+    shared_window_ptr screen_window = nullptr;
+    shared_surface_ptr screen_surface = nullptr;
     shared_renderer_ptr renderer = nullptr;
 
     std::vector<Entity> entities;
