@@ -19,7 +19,7 @@
 int WindowManager::init()
 {
     // Initialize screen window
-    screen_window = unique_window_ptr(
+    screen_window = mk_shared_window_ptr(
         SDL_CreateWindow(
             DEFAULT_SCREEN_TITLE,
             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -34,29 +34,31 @@ int WindowManager::init()
     }
 
     // Create temporary window surface
-    auto screen_surface = unique_surface_ptr(SDL_GetWindowSurface(screen_window.get()));
+    /*
+    screen_surface = mk_shared_surface_ptr(SDL_GetWindowSurface(screen_window.get()));
     if (screen_surface == nullptr)
     {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to create SDL_Surface: %s", SDL_GetError());
         return 1;
     }
+    */
 
     // Set window surface in renderer
-    renderer = unique_renderer_ptr(SDL_CreateRenderer(screen_window.get(), -1, SDL_RENDERER_ACCELERATED));
+    renderer = mk_shared_renderer_ptr(SDL_CreateRenderer(screen_window.get(), -1, SDL_RENDERER_ACCELERATED));
     if(renderer == nullptr)
     {
         SDL_Log("Failed to create SDL_Renderer: %s", SDL_GetError());
         return 1;
     }
 
-/*
-    SDL_FillRect(screen_surface.get(), nullptr, SDL_MapRGB(screen_surface.get()->format, 0xaf, 0xaf, 0xff));
-    SDL_UpdateWindowSurface(screen_window.get());
+    SDL_SetRenderDrawColor(renderer.get(), 0x0, 0xaf, 0xaf, 0xff);
+    SDL_Rect rect = {0,0,DEFAULT_SCREEN_WIDTH,DEFAULT_SCREEN_HEIGHT};
+    SDL_RenderFillRect(renderer.get(), &rect);
+    SDL_RenderPresent(renderer.get());
     SDL_Log("Showing a white screen...");
     SDL_Delay(2000);
     SDL_Log("Switching to a blue screen...");
-*/
-    
+
     Entity entity;
     if(!entity.set_entity(renderer, PathNS::get_assets_path() + "/test-imgs/blocky-sprite.png"))
     {
@@ -73,6 +75,7 @@ int WindowManager::init()
 
     entities.push_back(entity);
     entities.push_back(background);
+
     return 0;
 }
 
