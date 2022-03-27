@@ -1,6 +1,23 @@
 {
     "configurations": [
         {
+            "name": "Win32",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/../MINGW-SDL2/SDL2-devel-2.0.20-mingw/SDL2-2.0.20/x86_64-w64-mingw32/include/SDL2",
+                "${workspaceFolder}/../MINGW-SDL2/SDL2_image-devel-2.0.5-mingw/SDL2_image-2.0.5/x86_64-w64-mingw32/include/SDL2",
+                "${workspaceFolder}/../MINGW-SDL2/SDL2_ttf-devel-2.0.18-mingw/SDL2_ttf-2.0.18/x86_64-w64-mingw32/include/SDL2"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "cStandard": "c17",
+            "cppStandard": "c++17"
+        },
+        {
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
@@ -9,7 +26,7 @@
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu17",
-            "cppStandard": "gnu++14",
+            "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],
