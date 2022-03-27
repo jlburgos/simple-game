@@ -8,6 +8,8 @@
 // Aliases and methods to SDL struct pointers
 
 using unique_window_ptr = std::unique_ptr<SDL_Window, Custom_SDL_Window_Deleter>;
+using shared_window_ptr = std::shared_ptr<SDL_Window>;
+std::shared_ptr<SDL_Window> mk_shared_window_ptr(SDL_Window* window);
 
 using unique_surface_ptr = std::unique_ptr<SDL_Surface, Custom_SDL_Surface_Deleter>;
 using shared_surface_ptr = std::shared_ptr<SDL_Surface>;
