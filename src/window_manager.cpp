@@ -16,10 +16,15 @@
 #include "path.hpp"
 #include "logger.hpp"
 
+explicit WindowManager::WindowManagerException::WindowManagerException(const char* msg) : std::runtime_error(msg)
+{
+    // Nothing to do
+}
+
 int WindowManager::init()
 {
     // Initialize screen window
-    screen_window = mk_shared_window_ptr(
+    screen_window = unique_window_ptr(
         SDL_CreateWindow(
             DEFAULT_SCREEN_TITLE,
             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -33,16 +38,6 @@ int WindowManager::init()
         return 1;
     }
 
-    // Create temporary window surface
-    /*
-    screen_surface = mk_shared_surface_ptr(SDL_GetWindowSurface(screen_window.get()));
-    if (screen_surface == nullptr)
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to create SDL_Surface: %s", SDL_GetError());
-        return 1;
-    }
-    */
-
     // Set window surface in renderer
     renderer = mk_shared_renderer_ptr(SDL_CreateRenderer(screen_window.get(), -1, SDL_RENDERER_ACCELERATED));
     if(renderer == nullptr)
@@ -54,6 +49,7 @@ int WindowManager::init()
     SDL_SetRenderDrawColor(renderer.get(), 0x0, 0xaf, 0xaf, 0xff);
     SDL_Rect rect = {0,0,DEFAULT_SCREEN_WIDTH,DEFAULT_SCREEN_HEIGHT};
     SDL_RenderFillRect(renderer.get(), &rect);
+    //SDL_SetRenderDrawColor(renderer.get(), 0x0, 0xaf, 0xaf, 0xff);
     SDL_RenderPresent(renderer.get());
     SDL_Log("Showing a white screen...");
     SDL_Delay(2000);

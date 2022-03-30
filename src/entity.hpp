@@ -2,11 +2,15 @@
 #define _ENTITY_HPP
 
 #include "custom_sdl_wrapper.hpp"
+#include "asset.hpp"
 #include <string>
 
 class Entity
 {
 private:
+
+    //Asset asset;
+
     shared_texture_ptr texture = nullptr;
     shared_renderer_ptr renderer = nullptr;
 
@@ -31,6 +35,8 @@ public:
     void show();
     bool render_entity() const;
     bool render_background() const;
+
+    //virtual bool render() = 0;
 };
 
 #endif /* _ENTITY_HPP */

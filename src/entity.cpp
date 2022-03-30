@@ -2,13 +2,15 @@
 
 #include "entity.hpp"
 
-Entity::Entity(const Entity &entity)
+Entity::Entity(const Entity &entity) : 
+    texture(entity.get_texture()),
+    renderer(entity.get_renderer()),
+    spriteSrcInTexture(entity.get_src_texture()),
+    spriteDstOnSurface(entity.get_dst_texture())
 {
-    texture = entity.get_texture();
-    renderer = entity.get_renderer();
-    spriteSrcInTexture = entity.get_src_texture();
-    spriteDstOnSurface = entity.get_dst_texture();
+    // Nothing to do
 }
+
 
 SDL_Rect Entity::get_src_texture() const
 {

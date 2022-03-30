@@ -19,3 +19,8 @@ std::shared_ptr<SDL_Texture> mk_shared_texture_ptr(SDL_Texture *texture)
 {
 	return std::shared_ptr<SDL_Texture>(texture, Custom_SDL_Texture_Deleter());
 }
+
+std::shared_ptr<Entity> mk_shared_entity_ptr(Entity* entity)
+{
+	return std::shared_ptr<Entity>(entity);
+}
