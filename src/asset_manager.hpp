@@ -11,7 +11,7 @@ class AssetManager {
         AssetManager();
         ~AssetManager();
 
-        int load_img_assets();
+        shared_asset_p load_img_asset(const char* filename);
         int load_map_assets();
 
         int unload_img_assets();

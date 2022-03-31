@@ -8,7 +8,7 @@ AssetManager::~AssetManager() {
 
 }
 
-int AssetManager::load_img_assets() {
+Asset AssetManager::load_img_asset(const char* filename) {
     // Load dynamic img libs
     if (IMG_Init(IMG_INIT_PNG) == 0)
     {

@@ -9,14 +9,7 @@ class Entity
 {
 private:
 
-    //Asset asset;
-
-    shared_texture_ptr texture = nullptr;
-    shared_renderer_ptr renderer = nullptr;
-
-    // TODO
-    SDL_Rect spriteSrcInTexture = {0,0,0,0};
-    SDL_Rect spriteDstOnSurface = {0,0,0,0};
+    shared_asset_ptr asset = nullptr;
 
 public:
     Entity() = default;
@@ -38,5 +31,8 @@ public:
 
     //virtual bool render() = 0;
 };
+
+using shared_entity_ptr = std::shared_ptr<Entity>;
+std::shared_ptr<Entity> mk_shared_entity_ptr(Entity* entity);
 
 #endif /* _ENTITY_HPP */

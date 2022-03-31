@@ -16,7 +16,7 @@
 #include "path.hpp"
 #include "logger.hpp"
 
-explicit WindowManager::WindowManagerException::WindowManagerException(const char* msg) : std::runtime_error(msg)
+WindowManager::WindowManagerException::WindowManagerException(const char* msg) : std::runtime_error(msg)
 {
     // Nothing to do
 }

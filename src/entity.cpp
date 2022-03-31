@@ -133,3 +133,9 @@ int Entity::move(int x, int y)
     spriteDstOnSurface.y += y;
     return 0;
 }
+
+
+std::shared_ptr<Entity> mk_shared_entity_ptr(Entity* entity)
+{
+	return std::shared_ptr<Entity>(entity);
+}
