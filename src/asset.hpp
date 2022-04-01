@@ -5,6 +5,7 @@
 class Asset
 {
 private:
+	const char** filename = nullptr;
     shared_surface_ptr surface = nullptr;
     shared_texture_ptr texture = nullptr;
     shared_renderer_ptr renderer = nullptr;

@@ -1,10 +1,13 @@
 #include <SDL_image.h>
 
+#include <memory>
+
 #include "asset.hpp"
 
-Asset::Asset(shared_renderer_ptr _renderer, const char* filename)
+Asset::Asset(shared_renderer_ptr _renderer, const char* _filename)
 {
     renderer = _renderer;
+    filename = std::make_unique<char[]>(strlen(_filename));
     surface = unique_surface_ptr(IMG_Load(filename));
     if (surface == nullptr)
     {
@@ -59,8 +62,8 @@ int Asset::scale_texture(const float scale)
         return false;
     }
 
-    //if (SDL_BlitScaled(surface.get(), nullptr, scaled_surface.get(), nullptr) < 0)
-    if (SDL_BlitScaled(surface.get(), nullptr, scaled_surface.get(), &spriteDstOnSurface) < 0)
+    //if (SDL_BlitScaled(surface.get(), nullptr, scaled_surface.get(), &spriteDstOnSurface) < 0)
+    if (SDL_BlitScaled(surface.get(), nullptr, scaled_surface.get(), nullptr) < 0)
     {
         SDL_Log("Failed to scale surface: %s", SDL_GetError());
         texture = mk_shared_texture_ptr(SDL_CreateTextureFromSurface(renderer.get(), surface.get()));

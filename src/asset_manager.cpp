@@ -1,20 +1,20 @@
 #include "asset_manager.hpp"
 
-AssetManager::AssetManager() {
-
+AssetManager::AssetManager(const shared_renderer_ptr _renderer) : renderer(_renderer)
+{
+    assets.push_back(mk_shared_asset_ptr(new Asset(renderer, "blocky-sprite.png")));
+    assets.push_back(mk_shared_asset_ptr(new Asset(renderer, "test-background.png")));
 }
 
-AssetManager::~AssetManager() {
-
-}
-
-Asset AssetManager::load_img_asset(const char* filename) {
+shared_asset_ptr AssetManager::load_img_asset(const char* filename) {
     // Load dynamic img libs
     if (IMG_Init(IMG_INIT_PNG) == 0)
     {
         SDL_Log("Failed to initialize SDL Image support: %s", IMG_GetError());
-        return 1;
+        return nullptr;
     }
+
+    shared_asset_ptr asset = mk_shared_asset_ptr(new Asset(renderer, filename));
 
     /*
     TODO :: What assets do we load?
@@ -24,5 +24,5 @@ Asset AssetManager::load_img_asset(const char* filename) {
     // Unload dynamic img libs
     IMG_Quit();
 
-    return 0;
+    return asset;
 }

@@ -8,7 +8,6 @@
 class Entity
 {
 private:
-
     shared_asset_ptr asset = nullptr;
 
 public:
