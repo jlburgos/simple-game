@@ -67,7 +67,7 @@ int Asset::scale_texture(const float scale)
     }
     else
     {
-        SDL_Log("Scaling surface by %2.f scale", scale);
+        SDL_Log("Scaling surface by %.2f scale", scale);
         texture = mk_shared_texture_ptr(SDL_CreateTextureFromSurface(renderer.get(), scaled_surface.get()));
     }
 }
