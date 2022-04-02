@@ -38,7 +38,9 @@ std::string PathNS::get_exe_path()
             throw PathException("Failed in readlink call!");
         }
 #elif defined(OSX)
-        /* https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/dyld.3.html
+        /* Note: Of course, OSX had to do things differently ...
+         * https://stackoverflow.com/questions/22675457/what-is-the-equivalent-of-proc-self-exe-on-macintosh-os-x-mavericks
+         * https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/dyld.3.html
          * _NSGetExecutablePath() copies the path of the main executable into the
            buffer buf.  The bufsize parameter should initially be the size of the
            buffer.  This function returns 0 if the path was successfully copied.  It
