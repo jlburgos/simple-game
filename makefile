@@ -94,7 +94,7 @@ OS_SPECIFIC_FLAGS+=\
 	-m64
 
 ## SDL Flags
-SDL_FLAGS=\
+SDL_LINKER_FLAGS=\
 	-lSDL2main \
 	-lSDL2 \
 	-lSDL2_image \
@@ -116,10 +116,10 @@ INCLUDES := $(shell powershell 'Get-ChildItem "include" -Directory -Path "$(EXTE
 INCLUDES := $(subst \,/,$(addprefix -I, $(addsuffix /SDL2, $(INCLUDES))))
 LIBRARIES := $(shell powershell 'Get-ChildItem "lib" -Directory -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
 LIBRARIES := $(subst \,/,$(addprefix -L, $(LIBRARIES)))
-SDL_FLAGS+=$(INCLUDES) $(LIBRARIES)
+SDL_FLAGS := $(INCLUDES) $(LIBRARIES)
 	endif
 else
-SDL_FLAGS+=$(shell pkg-config --cflags --libs sdl2)
+SDL_FLAGS := $(shell pkg-config --cflags sdl2)
 endif
 
 WASM_SDL_FLAGS=\
@@ -139,8 +139,7 @@ OPTIMIZATION_DEBUG=\
 	-O0 \
 	-g
 OPTIMIZATION_RELEASE=\
-	-O3 \
-	-s
+	-O3
 
 ## Compiler flags to check "almost everything" because g++ doesn't have a "-Weverything-i-want" flag :P
 ## Notes: https://stackoverflow.com/questions/5088460/flags-to-enable-thorough-and-verbose-g-warnings
@@ -258,12 +257,12 @@ $(BIN_DEBUG): $(LOGS_DIR) $(DIRS_O) $(DLLS_DEBUG) $(OBJS_O_DEBUG) $(ICO_O) $(DIR
 	$(info ------------------------------------------------------)
 	$(info Building final executable $(BIN_DEBUG) ...)
 	$(info ------------------------------------------------------)
-	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_DEBUG) $(OPTIMIZATION_DEBUG) $(OPTS)
+	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_DEBUG) $(OPTIMIZATION_DEBUG) $(SDL_LINKER_FLAGS)
 $(BIN_RELEASE): $(LOGS_DIR) $(DIRS_O) $(DLLS_RELEASE) $(OBJS_O_RELEASE) $(ICO_O) $(DIRS_BIN_RELEASE)
 	$(info ------------------------------------------------------)
 	$(info Building final executable $(BIN_RELEASE) ...)
 	$(info ------------------------------------------------------)
-	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_RELEASE) $(OPTIMIZATION_RELEASE) $(OPTS)
+	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_RELEASE) $(OPTIMIZATION_RELEASE) $(SDL_LINKER_FLAGS)
 
 ## Generate build directory structure
 ## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
