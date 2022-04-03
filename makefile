@@ -163,7 +163,6 @@ CXX_COMPILER_FLAGS=\
 	-Wunreachable-code
 
 ifeq ($(UNAME_S),Darwin)
-	CXX_COMPILER_FLAGS := $(filter-out -Werror,$(CXX_COMPILER_FLAGS))
 	CXX_COMPILER_FLAGS := $(filter-out -Wmaybe-uninitialized,$(CXX_COMPILER_FLAGS))
 	CXX_COMPILER_FLAGS += -Wuninitialized
 endif
