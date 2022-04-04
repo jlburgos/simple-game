@@ -83,7 +83,7 @@ ifeq ($(OS), Windows_NT)
 OS_SPECIFIC_FLAGS+=\
 	-mwin32 \
 	-mthreads \
-  -mwindows
+	-mwindows
 else
 OS_SPECIFIC_FLAGS+=\
 	-pthread
