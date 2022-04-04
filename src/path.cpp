@@ -12,11 +12,18 @@
 #if defined(__linux__)
 #include <unistd.h>
 #define MAX_PATH 256
+#elif defined(OSX)
+#include <unistd.h>
+#include <mach-o/dyld.h>
+#define MAX_PATH 256
 #elif defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 #endif
+
 #include <iostream>
 #include <stdexcept>
+
+#include <SDL.h>
 
 #include "path.hpp"
 
@@ -25,11 +32,29 @@ std::string PathNS::get_exe_path()
     if (exe_path.empty())
     {
         char buffer[MAX_PATH];
-#ifdef __linux__
+#if defined(__linux__)
         ssize_t num_bytes = readlink("/proc/self/exe", buffer, MAX_PATH);
         if (num_bytes < 0 || num_bytes >= MAX_PATH)
         {
             throw PathException("Failed in readlink call!");
+        }
+#elif defined(OSX)
+        /* Note: Of course, OSX had to do things differently ...
+         * https://stackoverflow.com/questions/22675457/what-is-the-equivalent-of-proc-self-exe-on-macintosh-os-x-mavericks
+         * https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/dyld.3.html
+         * _NSGetExecutablePath() copies the path of the main executable into the
+           buffer buf.  The bufsize parameter should initially be the size of the
+           buffer.  This function returns 0 if the path was successfully copied.  It
+           returns -1 if the buffer is not large enough, and * bufsize is set to the
+           size required.  Note that _NSGetExecutablePath() will return "a path" to
+           the executable not a "real path" to the executable.  That is, the path
+           may be a symbolic link and not the real file. With deep directories the
+           total bufsize needed could be more than MAXPATHLEN.
+         */
+        uint32_t num_bytes = MAX_PATH;
+        if (_NSGetExecutablePath(buffer, &num_bytes) != 0)
+        {
+            throw PathException("Failed in _NSGetExecutablePath() call!");
         }
 #elif defined(_WIN32) || defined(_WIN64)
         /* Not calling GetModuleFileName(..) since it resolves to GetModuleFIleNameW since UNICODE is defined.
