@@ -11,6 +11,7 @@
 
 #if defined(__linux__)
 #include <unistd.h>
+#define MAX_PATH 256
 #elif defined(OSX)
 #include <unistd.h>
 #include <mach-o/dyld.h>
