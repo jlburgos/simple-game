@@ -157,6 +157,8 @@ void WindowManager::start()
                 }
             }*/
         }
+        
+        // TODO :: Moving diagnolly needs to be fixed via pythag theorem
         if (*up)     entity.move(0, -10);
         if (*down)   entity.move(0, 10);
         if (*left)   entity.move(-10, 0);
