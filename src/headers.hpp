@@ -22,7 +22,7 @@
 #include <emscripten.h>
 #endif
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(OSX)
 #include <unistd.h>
 #elif defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
