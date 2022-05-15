@@ -1,14 +1,58 @@
 [
-  {"command": "make", "file": "build/src/custom_sdl_deleter.debug.o"},
-  {"command": "make", "file": "build/src/custom_sdl_pointers.debug.o"},
-  {"command": "make", "file": "build/src/custom_sdl_wrapper.debug.o"},
-  {"command": "make", "file": "build/src/entity.debug.o"},
-  {"command": "make", "file": "build/src/logger.debug.o"},
-  {"command": "make", "file": "build/src/main.debug.o"},
-  {"command": "make", "file": "build/src/message.debug.o"},
-  {"command": "make", "file": "build/src/message_queue.debug.o"},
-  {"command": "make", "file": "build/src/path.debug.o"},
-  {"command": "make", "file": "build/src/texture.debug.o"},
-  {"command": "make", "file": "build/src/timer.debug.o"},
-  {"command": "make", "file": "build/src/window_manager.debug.o"}
+    {
+        "command": "make",
+        "file": "build/src/asset.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/asset_manager.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/custom_sdl_deleter.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/custom_sdl_pointers.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/custom_sdl_wrapper.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/entity.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/logger.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/main.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/message.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/message_queue.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/path.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/texture.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/timer.debug.o"
+    },
+    {
+        "command": "make",
+        "file": "build/src/window_manager.debug.o"
+    }
 ]
