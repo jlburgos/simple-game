@@ -271,9 +271,8 @@ endif
 MAKEFLAGS += -j$(NPROCS)
 
 ## User targets
-default: debug
-debug: $(BIN_DEBUG)
-release: $(BIN_RELEASE)
+debug-build: $(BIN_DEBUG)
+release-build: $(BIN_RELEASE)
 all: $(BIN_DEBUG) $(BIN_RELEASE)
 
 ## Compile final binary
