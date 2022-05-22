@@ -123,6 +123,8 @@ SDL_LINKER_FLAGS=\
 	-lSDL2_ttf
 ifeq ($(OS), Windows_NT)
 SDL_LINKER_FLAGS += $(SDL_LIBRARIES)
+else
+SDL_LINKER_FLAGS := $(shell pkg-config --cflags --libs sdl2) $(SDL_LINKER_FLAGS)
 endif
 
 WASM_SDL_FLAGS=\
@@ -236,21 +238,25 @@ endif
 DIRS_BIN_DEBUG   := $(dir $(BIN_DEBUG))
 DIRS_BIN_RELEASE := $(dir $(BIN_RELEASE))
 
-## Adding this here for make --dry-run
-#ifeq ($(OS), Windows_NT)
-#$(shell powershell 'if (-not (Test-Path -Path "$(DIRS_BIN_DEBUG)" -PathType Container)) { $$output_sink = New-Item -Path "$(DIRS_BIN_DEBUG)" -ItemType Directory }')
-#$(shell powershell 'if (-not (Test-Path -Path "$(DIRS_BIN_RELEASE)" -PathType Container)) { $$output_sink = New-Item -Path "$(DIRS_BIN_RELEASE)" -ItemType Directory }')
-#else
-#$(shell mkdir -p '$(DIRS_BIN_DEBUG)')
-#$(shell mkdir -p '$(DIRS_BIN_RELEASE)')
-#endif
-
 ## DLL files and output location where they will be copied
 ifeq ($(OS), Windows_NT)
 DLLS_SRC  := $(shell powershell 'Get-ChildItem "*.dll" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.DirectoryName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
 DLLS_SRC  := $(subst \,/,$(DLLS_SRC))
 DLLS_DEBUG   := $(addprefix $(DIRS_BIN_DEBUG)/, $(notdir $(DLLS_SRC)))
 DLLS_RELEASE := $(addprefix $(DIRS_BIN_RELEASE)/, $(notdir $(DLLS_SRC)))
+endif
+
+######################################################################################################
+######################################################################################################
+
+## Generate build directory structure
+## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
+##       returns a large string that we want to ignore.
+ALL_REQUIRED_DIRS = $(LOGS_DIR) $(DIRS_O) $(BIN_DIR) $(DIRS_BIN_DEBUG) $(DIRS_BIN_RELEASE)
+ifeq ($(OS), Windows_NT)
+$(foreach dir, $(ALL_REQUIRED_DIRS), $(powershell 'if (-not (Test-Path -Path "$(dir)" -PathType Container)) { $$output_sink = New-Item -Path "$(dir)" -ItemType Directory }'))
+else
+$(foreach dir, $(ALL_REQUIRED_DIRS), $(shell mkdir -p '$(dir)'))
 endif
 
 ######################################################################################################
@@ -263,23 +269,13 @@ default: debug
 debug: $(BIN_DEBUG)
 release: $(BIN_RELEASE)
 all: $(BIN_DEBUG) $(BIN_RELEASE)
-dirs: $(LOGS_DIR) $(DIRS_O) $(DIRS_BIN_DEBUG) $(DIRS_BIN_RELEASE) $(ICO_DIR)
 
 ## Compile final binary
 $(BIN_DEBUG): $(OBJS_O_DEBUG)
 	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_DEBUG) $(OPTIMIZATION_DEBUG) $(SDL_LINKER_FLAGS)
+
 $(BIN_RELEASE): $(OBJS_O_RELEASE)
 	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_RELEASE) $(OPTIMIZATION_RELEASE) $(SDL_LINKER_FLAGS)
-
-## Generate build directory structure
-## Note: The '$$output_sink' variable is - as the name suggests - a 'sink' to contain the output of running 'mkdir' in powershell, which
-##       returns a large string that we want to ignore.
-$(LOGS_DIR) $(DIRS_O) $(DIRS_BIN_DEBUG) $(DIRS_BIN_RELEASE):
-ifeq ($(OS), Windows_NT)
-	@powershell 'if (-not (Test-Path -Path "$@" -PathType Container)) { $$output_sink = New-Item -Path "$@" -ItemType Directory }'
-else
-	@mkdir -p '$@'
-endif
 
 ## Copy all the DLLs for Windows build
 $(DLLS_DEBUG): $(DIRS_BIN_DEBUG)
