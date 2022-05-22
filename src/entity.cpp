@@ -2,13 +2,12 @@
 
 #include "entity.hpp"
 
-Entity::Entity(const Entity &entity) : 
-    texture(entity.get_texture()),
-    renderer(entity.get_renderer()),
-    spriteSrcInTexture(entity.get_src_texture()),
-    spriteDstOnSurface(entity.get_dst_texture())
+Entity::Entity(const Entity &entity)
 {
-    // Nothing to do
+    texture = entity.get_texture();
+    renderer = entity.get_renderer();
+    spriteSrcInTexture = entity.get_src_texture();
+    spriteDstOnSurface = entity.get_dst_texture();
 }
 
 

@@ -9,6 +9,10 @@ class Entity
 {
 private:
     shared_asset_ptr asset = nullptr;
+    SDL_Rect spriteSrcInTexture;
+    SDL_Rect spriteDstOnSurface;
+    shared_renderer_ptr renderer = nullptr;
+    shared_texture_ptr texture = nullptr;
 
 public:
     Entity() = default;

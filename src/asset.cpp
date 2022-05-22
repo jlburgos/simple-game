@@ -6,6 +6,9 @@
 
 Asset::Asset(shared_renderer_ptr _renderer, const char* _filename)
 {
+  (void) _renderer;
+  (void) _filename;
+  /* TODO: DISABLE FOR NOW
     renderer = _renderer;
     filename = std::make_unique<char[]>(strlen(_filename));
     surface = unique_surface_ptr(IMG_Load(filename));
@@ -15,6 +18,7 @@ Asset::Asset(shared_renderer_ptr _renderer, const char* _filename)
         throw AssetException("Failed to load asset");
     }
     texture = mk_shared_texture_ptr(SDL_CreateTextureFromSurface(renderer.get(), surface.get()));
+    */
 }
 
 Asset::AssetException::AssetException(const char* msg) : std::runtime_error(msg)
@@ -44,6 +48,9 @@ SDL_Rect Asset::get_dst_surface_rect() const
 
 int Asset::scale_texture(const float scale)
 {
+  (void) scale;
+  return 0;
+  /* TODO: DISABLE FOR NOW
     auto scaled_surface = unique_surface_ptr(
         SDL_CreateRGBSurface(
             surface->flags,
@@ -73,4 +80,9 @@ int Asset::scale_texture(const float scale)
         SDL_Log("Scaling surface by %.2f scale", scale);
         texture = mk_shared_texture_ptr(SDL_CreateTextureFromSurface(renderer.get(), scaled_surface.get()));
     }
+    */
+}
+
+std::shared_ptr<Asset> mk_shared_asset_ptr(Asset* asset) {
+	return std::shared_ptr<Asset>(asset);
 }

@@ -5,12 +5,12 @@
 class Asset
 {
 private:
-	const char** filename = nullptr;
-    shared_surface_ptr surface = nullptr;
-    shared_texture_ptr texture = nullptr;
-    shared_renderer_ptr renderer = nullptr;
-    SDL_Rect spriteSrcInTexture = {0,0,0,0};
-    SDL_Rect spriteDstOnSurface = {0,0,0,0};
+	//const char** filename = nullptr;
+  shared_surface_ptr surface = nullptr;
+  shared_texture_ptr texture = nullptr;
+  shared_renderer_ptr renderer = nullptr;
+  SDL_Rect spriteSrcInTexture = {0,0,0,0};
+  SDL_Rect spriteDstOnSurface = {0,0,0,0};
 
 public:
 	Asset() = delete;
