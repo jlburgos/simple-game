@@ -93,13 +93,6 @@ endif
 OS_SPECIFIC_FLAGS+=\
 	-m64
 
-## SDL Flags
-SDL_LINKER_FLAGS=\
-	-lSDL2main \
-	-lSDL2 \
-	-lSDL2_image \
-	-lSDL2_ttf
-
 ## If manually set up SDL includes (.h files) and SDL libraries (.a & .la files), we grab those for windows
 ## Else for linux we get the flags from `pkg-config` (using `sdl-config` also works)
 ## Note: Grabbing 'release' builds from https://github.com/libsdl-org
@@ -112,14 +105,24 @@ ifeq ($(OS), Windows_NT)
 	ifeq ("$(wildcard $(EXTERNAL_SDL2_DEP))","")
 $(error "Failed to locate expected '$(EXTERNAL_SDL2_DEP)' directory containing SDL2 dependencies!")
 	else
-INCLUDES := $(shell powershell 'Get-ChildItem "include" -Directory -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
-INCLUDES := $(subst \,/,$(addprefix -I, $(addsuffix /SDL2, $(INCLUDES))))
-LIBRARIES := $(shell powershell 'Get-ChildItem "lib" -Directory -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
-LIBRARIES := $(subst \,/,$(addprefix -L, $(LIBRARIES)))
-SDL_FLAGS := $(INCLUDES) $(LIBRARIES)
+SDL_INCLUDES := $(shell powershell 'Get-ChildItem "include" -Directory -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
+SDL_INCLUDES := $(subst \,/,$(addprefix -I, $(addsuffix /SDL2, $(SDL_INCLUDES))))
+SDL_LIBRARIES := $(shell powershell 'Get-ChildItem "lib" -Directory -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.FullName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
+SDL_LIBRARIES := $(subst \,/,$(addprefix -L, $(SDL_LIBRARIES)))
+SDL_FLAGS := $(SDL_INCLUDES) $(SDL_LIBRARIES)
 	endif
 else
 SDL_FLAGS := $(shell pkg-config --cflags sdl2)
+endif
+
+## SDL Flags
+SDL_LINKER_FLAGS=\
+	-lSDL2main \
+	-lSDL2 \
+	-lSDL2_image \
+	-lSDL2_ttf
+ifeq ($(OS), Windows_NT)
+SDL_LINKER_FLAGS += $(SDL_LIBRARIES)
 endif
 
 WASM_SDL_FLAGS=\
@@ -233,6 +236,15 @@ endif
 DIRS_BIN_DEBUG   := $(dir $(BIN_DEBUG))
 DIRS_BIN_RELEASE := $(dir $(BIN_RELEASE))
 
+## Adding this here for make --dry-run
+#ifeq ($(OS), Windows_NT)
+#$(shell powershell 'if (-not (Test-Path -Path "$(DIRS_BIN_DEBUG)" -PathType Container)) { $$output_sink = New-Item -Path "$(DIRS_BIN_DEBUG)" -ItemType Directory }')
+#$(shell powershell 'if (-not (Test-Path -Path "$(DIRS_BIN_RELEASE)" -PathType Container)) { $$output_sink = New-Item -Path "$(DIRS_BIN_RELEASE)" -ItemType Directory }')
+#else
+#$(shell mkdir -p '$(DIRS_BIN_DEBUG)')
+#$(shell mkdir -p '$(DIRS_BIN_RELEASE)')
+#endif
+
 ## DLL files and output location where they will be copied
 ifeq ($(OS), Windows_NT)
 DLLS_SRC  := $(shell powershell 'Get-ChildItem "*.dll" -Path "$(EXTERNAL_SDL2_DEP)" -Recurse | Where {$$_.DirectoryName -match "$(PLATFORM_VERSION)"} | Resolve-Path -Relative')
@@ -247,20 +259,16 @@ endif
 MAKEFLAGS += -j$(NPROCS)
 
 ## User targets
+default: debug
 debug: $(BIN_DEBUG)
 release: $(BIN_RELEASE)
 all: $(BIN_DEBUG) $(BIN_RELEASE)
+dirs: $(LOGS_DIR) $(DIRS_O) $(DIRS_BIN_DEBUG) $(DIRS_BIN_RELEASE) $(ICO_DIR)
 
 ## Compile final binary
-$(BIN_DEBUG): $(LOGS_DIR) $(DIRS_O) $(DLLS_DEBUG) $(OBJS_O_DEBUG) $(ICO_O) $(DIRS_BIN_DEBUG)
-	$(info ------------------------------------------------------)
-	$(info Building final executable $(BIN_DEBUG) ...)
-	$(info ------------------------------------------------------)
+$(BIN_DEBUG): $(OBJS_O_DEBUG)
 	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_DEBUG) $(OPTIMIZATION_DEBUG) $(SDL_LINKER_FLAGS)
-$(BIN_RELEASE): $(LOGS_DIR) $(DIRS_O) $(DLLS_RELEASE) $(OBJS_O_RELEASE) $(ICO_O) $(DIRS_BIN_RELEASE)
-	$(info ------------------------------------------------------)
-	$(info Building final executable $(BIN_RELEASE) ...)
-	$(info ------------------------------------------------------)
+$(BIN_RELEASE): $(OBJS_O_RELEASE)
 	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_RELEASE) $(OPTIMIZATION_RELEASE) $(SDL_LINKER_FLAGS)
 
 ## Generate build directory structure
@@ -268,20 +276,10 @@ $(BIN_RELEASE): $(LOGS_DIR) $(DIRS_O) $(DLLS_RELEASE) $(OBJS_O_RELEASE) $(ICO_O)
 ##       returns a large string that we want to ignore.
 $(LOGS_DIR) $(DIRS_O) $(DIRS_BIN_DEBUG) $(DIRS_BIN_RELEASE):
 ifeq ($(OS), Windows_NT)
-	powershell 'if (-not (Test-Path -Path "$@" -PathType Container)) { $$output_sink = New-Item -Path "$@" -ItemType Directory }'
+	@powershell 'if (-not (Test-Path -Path "$@" -PathType Container)) { $$output_sink = New-Item -Path "$@" -ItemType Directory }'
 else
-	mkdir -p '$@'
+	@mkdir -p '$@'
 endif
-
-## Set Windows executable thumbnail icon
-$(ICO_O): $(ICO_DIR)
-	$(WINDRES) $(ICO_RC) $(ICO_O)
-
-## Compile CPP object files
-$(BUILD_DIR)/%.debug.o: %.cpp
-	$(CXX) -c -o '$@' '$<' $(OPTIMIZATION_DEBUG) $(OPTS)
-$(BUILD_DIR)/%.release.o: %.cpp
-	$(CXX) -c -o '$@' '$<' $(OPTIMIZATION_RELEASE) $(OPTS)
 
 ## Copy all the DLLs for Windows build
 $(DLLS_DEBUG): $(DIRS_BIN_DEBUG)
@@ -293,6 +291,17 @@ ifeq ($(OS), Windows_NT)
 	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_RELEASE))"'))
 endif
 
+## Set Windows executable thumbnail icon
+$(ICO_O): $(ICO_DIR)
+	@$(WINDRES) $(ICO_RC) $(ICO_O)
+
+## Compile individual CPP object files (debug & release)
+$(BUILD_DIR)/%.debug.o: %.cpp
+	$(CXX) -c -o '$@' '$<' $(OPTIMIZATION_DEBUG) $(OPTS)
+
+$(BUILD_DIR)/%.release.o: %.cpp
+	$(CXX) -c -o '$@' '$<' $(OPTIMIZATION_RELEASE) $(OPTS)
+
 ## Compile web-assembly version using docker container
 ## Note: Disabling compile pipeline experiments for now
 #wasm:
@@ -303,16 +312,17 @@ endif
 #			"$(PIP) install requests && $(EMXX) /$(BUILD_DIR)/$(SRC_DIR)/*.cpp -o /$(BUILD_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
 
 ## Clean build artifacts
+## Note: Will need to rerun 'make init' to recreate directories and dependencies
 PHONY += clean
 clean:
 ifeq ($(OS),Windows_NT)
-	powershell 'if (Test-Path -Path "$(BIN_DIR)" -PathType Container) { Remove-Item -Path "$(BIN_DIR)" -Recurse }'
-	powershell 'if (Test-Path -Path "$(BUILD_DIR)" -PathType Container) { Remove-Item -Path "$(BUILD_DIR)" -Recurse }'
-	powershell 'if (Test-Path -Path "$(LOGS_DIR)" -PathType Container) { Remove-Item -Path "$(LOGS_DIR)" -Recurse }'
+	@powershell 'if (Test-Path -Path "$(BIN_DIR)" -PathType Container) { Remove-Item -Path "$(BIN_DIR)" -Recurse }'
+	@powershell 'if (Test-Path -Path "$(BUILD_DIR)" -PathType Container) { Remove-Item -Path "$(BUILD_DIR)" -Recurse }'
+	@powershell 'if (Test-Path -Path "$(LOGS_DIR)" -PathType Container) { Remove-Item -Path "$(LOGS_DIR)" -Recurse }'
 else
-	$(RM) -r '$(BIN_DIR)'
-	$(RM) -r '$(BUILD_DIR)'
-	$(RM) -r '$(LOGS_DIR)'
+	@$(RM) -r '$(BIN_DIR)'
+	@$(RM) -r '$(BUILD_DIR)'
+	@$(RM) -r '$(LOGS_DIR)'
 endif
 
 ## Set up .PHONY

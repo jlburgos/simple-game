@@ -12,6 +12,8 @@ x64
 
 # Ignore logs directory
 logs
+.vscode/*log
+.vscode/*code-workspace
 
 # Ignore bin dir
 bin
