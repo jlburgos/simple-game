@@ -4,7 +4,12 @@
 #include "custom_sdl_deleter.hpp"
 
 #include <memory>
+/*
+namespace sgl // standard-game-library
+{
 
+};
+*/
 // Aliases and methods to SDL struct pointers
 
 using unique_window_ptr = std::unique_ptr<SDL_Window, Custom_SDL_Window_Deleter>;

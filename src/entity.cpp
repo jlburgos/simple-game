@@ -2,13 +2,15 @@
 
 #include "entity.hpp"
 
-Entity::Entity(const Entity &entity)
+Entity::Entity(const Entity &entity) : 
+    texture(entity.get_texture()),
+    renderer(entity.get_renderer()),
+    spriteSrcInTexture(entity.get_src_texture()),
+    spriteDstOnSurface(entity.get_dst_texture())
 {
-    texture = entity.get_texture();
-    renderer = entity.get_renderer();
-    spriteSrcInTexture = entity.get_src_texture();
-    spriteDstOnSurface = entity.get_dst_texture();
+    // Nothing to do
 }
+
 
 SDL_Rect Entity::get_src_texture() const
 {
@@ -130,4 +132,10 @@ int Entity::move(int x, int y)
     spriteDstOnSurface.x += x;
     spriteDstOnSurface.y += y;
     return 0;
+}
+
+
+std::shared_ptr<Entity> mk_shared_entity_ptr(Entity* entity)
+{
+	return std::shared_ptr<Entity>(entity);
 }

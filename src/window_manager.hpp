@@ -7,6 +7,8 @@
 #include "headers.hpp"
 #include "custom_sdl_wrapper.hpp"
 #include "entity.hpp"
+#include "asset_manager.hpp"
+#include "layer.hpp"
 
 class WindowManager
 {
@@ -15,9 +17,10 @@ private:
     const int DEFAULT_SCREEN_WIDTH = 720;
     const int DEFAULT_SCREEN_HEIGHT = 480;
 
-    shared_window_ptr screen_window = nullptr;
-    shared_surface_ptr screen_surface = nullptr;
+    unique_window_ptr screen_window = nullptr;
     shared_renderer_ptr renderer = nullptr;
+    
+    std::vector<Layer> layers;
 
     std::vector<Entity> entities;
 
@@ -31,10 +34,7 @@ public:
     class WindowManagerException : public std::runtime_error
     {
     public:
-        WindowManagerException(const char* msg) : std::runtime_error(msg)
-        {
-            // Nothing to do
-        }
+        explicit WindowManagerException(const char* msg);
     };
 };
 
