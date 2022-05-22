@@ -259,6 +259,12 @@ else
 $(foreach dir, $(ALL_REQUIRED_DIRS), $(shell mkdir -p '$(dir)'))
 endif
 
+## Copy all the DLLs for Windows build
+ifeq ($(OS), Windows_NT)
+	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_DEBUG))"'))
+	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_RELEASE))"'))
+endif
+
 ######################################################################################################
 ######################################################################################################
 
@@ -276,16 +282,6 @@ $(BIN_DEBUG): $(OBJS_O_DEBUG)
 
 $(BIN_RELEASE): $(OBJS_O_RELEASE)
 	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_RELEASE) $(OPTIMIZATION_RELEASE) $(SDL_LINKER_FLAGS)
-
-## Copy all the DLLs for Windows build
-$(DLLS_DEBUG): $(DIRS_BIN_DEBUG)
-ifeq ($(OS), Windows_NT)
-	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_DEBUG))"'))
-endif
-$(DLLS_RELEASE): $(DIRS_BIN_RELEASE)
-ifeq ($(OS), Windows_NT)
-	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_RELEASE))"'))
-endif
 
 ## Set Windows executable thumbnail icon
 $(ICO_O): $(ICO_DIR)
