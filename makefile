@@ -261,8 +261,8 @@ endif
 
 ## Copy all the DLLs for Windows build
 ifeq ($(OS), Windows_NT)
-	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_DEBUG))"'))
-	$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_RELEASE))"'))
+$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_DEBUG))"'))
+$(foreach dll,$(DLLS_SRC),$(shell powershell 'Copy-Item -Path "$(dll)" -Destination "$(dir $(BIN_RELEASE))"'))
 endif
 
 ######################################################################################################
