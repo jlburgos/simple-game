@@ -17,6 +17,7 @@ ifeq ($(OS), Windows_NT)
 CWD := $(shell powershell '(Get-Location).path')
 ROOT_DIR := $(shell powershell '(Get-Item -Path "'$(CWD)'").BaseName')
 else
+CWD := $(shell pwd)
 ROOT_DIR := $(shell pwd | rev | cut -d'/' -f1 | rev)
 endif
 
@@ -299,12 +300,11 @@ $(BUILD_DIR)/%.release.o: %.cpp
 
 ## Compile web-assembly version using docker container
 ## Note: Disabling compile pipeline experiments for now
-#wasm:
-#	docker run \
-#		--rm \
-#		--volume $(ROOT_DIR):/$(BUILD_DIR) \
-#		emscripten/emsdk /bin/bash -c \
-#			"$(PIP) install requests && $(EMXX) /$(BUILD_DIR)/$(SRC_DIR)/*.cpp -o /$(BUILD_DIR)/$(BIN_DIR)/$(BIN_NAME).html $(WASM_OPTS)"
+wasm-debug:
+	docker run \
+		--rm \
+		--mount type=bind,source="$(CWD)/build",target="/build" \
+		emscripten/emsdk /bin/bash -c "$(PIP) install requests && $(EMXX) $(addprefix /, $(OBJS_O_DEBUG)) -o $(BIN_NAME).html $(WASM_OPTS)"
 
 ## Clean build artifacts
 ## Note: Will need to rerun 'make init' to recreate directories and dependencies
