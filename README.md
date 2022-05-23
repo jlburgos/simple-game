@@ -1,5 +1,8 @@
 # Simple Game
 
+## Build Status
+![C/C++ CI - Test Build - Workflow](https://github.com/jlburgos/simple-game/actions/workflows/c-cpp.yml/badge.svg)
+
 ## Idea
 This is a sandbox game project where I'm essentially going to through whatever I want at it as part of the learning process :-)
 
