@@ -281,14 +281,14 @@ ifeq ($(OS), Windows_NT)
   ## Set Windows executable thumbnail icon
 	@$(WINDRES) $(ICO_RC) $(ICO_O)
 endif
-	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_DEBUG) $(OPTIMIZATION_DEBUG) $(SDL_LINKER_FLAGS)
+	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_DEBUG) $(OPTIMIZATION_DEBUG) $(OS_SPECIFIC_FLAGS) $(SDL_LINKER_FLAGS)
 
 $(BIN_RELEASE): $(OBJS_O_RELEASE) $(ICO_O)
 ifeq ($(OS), Windows_NT)
   ## Set Windows executable thumbnail icon
 	@$(WINDRES) $(ICO_RC) $(ICO_O)
 endif
-	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_RELEASE) $(OPTIMIZATION_RELEASE) $(SDL_LINKER_FLAGS)
+	$(CXX) -o "$@" $(ICO_O) $(OBJS_O_RELEASE) $(OPTIMIZATION_RELEASE) $(OS_SPECIFIC_FLAGS) $(SDL_LINKER_FLAGS)
 
 ## Compile individual CPP object files (debug & release)
 $(BUILD_DIR)/%.debug.o: %.cpp
