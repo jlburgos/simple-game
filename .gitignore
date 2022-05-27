@@ -20,3 +20,6 @@ bin
 
 # Ignore build dir
 build
+
+# Ignore node_modules
+node_modules
