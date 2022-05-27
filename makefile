@@ -301,10 +301,17 @@ $(BUILD_DIR)/%.release.o: %.cpp
 ## Compile web-assembly version using docker container
 ## Note: Disabling compile pipeline experiments for now
 wasm-debug:
-	docker run \
+	em++ src/*.cpp -o simple-game.html \
+		-std=c++17 \
+		-D OSX -D IA32 \
+		-sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sUSE_SDL_TTF=2 -sSDL2_IMAGE_FORMATS="[bmp,jpg]" -sLLD_REPORT_UNDEFINED -sWASM=1 -v --closure 1 --minify 0 --bind \
+		-Wall -Wextra -Werror -Wempty-body -Warray-bounds -pedantic -pedantic-errors -Wcast-align -Wcast-qual -Wconversion -Wdisabled-optimization -Wfloat-equal -Wlong-long -Wimport -Winit-self -Winline -Wmissing-field-initializers -Wmissing-format-attribute -Wmissing-include-dirs -Wmissing-noreturn -Wpacked -Wpointer-arith -Wredundant-decls -Wshadow -Wstack-protector -Wstrict-aliasing=2 -Wformat=2 -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wswitch-enum -Wvariadic-macros -Wwrite-strings -Wunreachable-code -Wuninitialized
+#	docker run \
 		--rm \
 		--mount type=bind,source="$(CWD)/build",target="/build" \
-		emscripten/emsdk /bin/bash -c "$(PIP) install requests && $(EMXX) $(addprefix /, $(OBJS_O_DEBUG)) -o $(BIN_NAME).html $(WASM_OPTS)"
+		--mount type=bind,source="$(CWD)/src",target="/src,readonly" \
+		emscripten/emsdk /bin/bash -c "$(PIP) install requests && $(EMXX) /src/*.cpp -o $(BIN_NAME).html $(WASM_OPTS)"
+		#emscripten/emsdk /bin/bash -c "$(PIP) install requests && $(EMXX) $(addprefix /, $(OBJS_O_DEBUG)) -o $(BIN_NAME).html $(WASM_OPTS)"
 
 ## Clean build artifacts
 ## Note: Will need to rerun 'make init' to recreate directories and dependencies
