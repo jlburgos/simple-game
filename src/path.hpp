@@ -15,6 +15,11 @@
 #include <string>
 #include <stdexcept>
 
+#include <filesystem>
+//using fs = std::filesystem;
+namespace fs = std::filesystem;
+
+
 namespace PathNS
 {
     class PathException : public std::runtime_error
@@ -36,6 +41,9 @@ namespace PathNS
                     root_path = "";
     }
 
+    void set_exe_path(const std::string_view path);
+
+    std::string get_exe_path_filesystem2();
     std::string get_exe_path();
     std::string get_exe_path_no_ext();
     std::string get_exe_name_no_path();

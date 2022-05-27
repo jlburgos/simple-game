@@ -10,17 +10,23 @@
  */
 
 #include "headers.hpp"
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
-    (void)argc;
-    (void)argv;
+    if (argc == 0) {
+        std::cerr << "Something has gone terribly wrong! There's no arg 0! This is usually the path to binary...";
+        return 1;
+    }
 
     int rc = EXIT_FAILURE;
     try
     {
         // Workaround for not using SDL_main() as entrypoint
         SDL_SetMainReady();
+
+        // Using std::filesystem we avoid needing to implement OS dependent way to finding exe path
+        PathNS::set_exe_path(argv[0]);
 
         // Initialize SDL
         if (!Custom_SDL_Wrapper::init())
